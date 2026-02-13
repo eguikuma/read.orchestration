@@ -1,12 +1,13 @@
-<div align="right">
-<img src="https://img.shields.io/badge/AI-ASSISTED_STUDY-3b82f6?style=for-the-badge&labelColor=1e293b&logo=bookstack&logoColor=white" alt="AI Assisted Study" />
-</div>
+---
+layout: default
+title: スケーリング
+---
 
-# 06-scaling：スケーリング
+# [06-scaling：スケーリング](#scaling) {#scaling}
 
-## はじめに
+## [はじめに](#introduction) {#introduction}
 
-前のトピック [05-self-healing](./05-self-healing.md) では、障害を自動で検知し、あるべき状態に戻すセルフヒーリングの仕組みを学びました
+前のトピック [05-self-healing](../05-self-healing/) では、障害を自動で検知し、あるべき状態に戻すセルフヒーリングの仕組みを学びました
 
 Reconciliation Loop がコンテナの異常終了、Pod の消失、ノードのダウンを検知し、コンテナの再起動、Pod の再作成、Pod の退避を自動で行うことを確認しました
 
@@ -28,7 +29,7 @@ Reconciliation Loop がコンテナの異常終了、Pod の消失、ノード�
 
 ---
 
-## 日常の例え
+## [日常の例え](#everyday-analogy) {#everyday-analogy}
 
 スケーリングの考え方を、日常の例えで見てみましょう
 
@@ -72,7 +73,7 @@ Kubernetes は水平スケーリング、つまり Pod の数を増減させる�
 
 ---
 
-## このページで学ぶこと
+## [このページで学ぶこと](#what-you-will-learn) {#what-you-will-learn}
 
 このページでは、以下の概念を学びます
 
@@ -99,39 +100,40 @@ Kubernetes は水平スケーリング、つまり Pod の数を増減させる�
 
 ---
 
-## 目次
+## [目次](#table-of-contents) {#table-of-contents}
 
-1. [スケーリングとは](#スケーリングとは)
-2. [手動スケーリング](#手動スケーリング)
-3. [HPA（Horizontal Pod Autoscaler）](#hpahorizontal-pod-autoscaler)
-4. [メトリクスに基づく判断](#メトリクスに基づく判断)
-5. [HPA のアルゴリズム](#hpa-のアルゴリズム)
-6. [スケールアウトとスケールイン](#スケールアウトとスケールイン)
-7. [垂直スケーリング（対比として）](#垂直スケーリング対比として)
-8. [スケーリングの全体像](#スケーリングの全体像)
-9. [次のトピックへ](#次のトピックへ)
-10. [用語集](#用語集)
-11. [参考資料](#参考資料)
+1. [スケーリングとは](#what-is-scaling)
+2. [手動スケーリング](#manual-scaling)
+3. [HPA（Horizontal Pod Autoscaler）](#hpa)
+4. [メトリクスに基づく判断](#metrics-based-decision)
+5. [HPA のアルゴリズム](#hpa-algorithm)
+6. [スケールアウトとスケールイン](#scale-out-and-scale-in)
+7. [垂直スケーリング（対比として）](#vertical-scaling)
+8. [スケーリングの全体像](#scaling-overview)
+9. [次のトピックへ](#next-topic)
+10. [用語集](#glossary)
+11. [参考資料](#references)
 
 ---
 
-## スケーリングとは
+## [スケーリングとは](#what-is-scaling) {#what-is-scaling}
 
-### Compose からの振り返り
+### [Compose からの振り返り](#compose-review) {#compose-review}
 
 前のシリーズでコンテナ管理を学んだ方は、Compose で `--scale` オプションや `replicas` を使ってコンテナの数を増やせたことを思い出すかもしれません
 
 しかし、Compose のスケーリングには制約がありました
 
-| 制約                       | 説明                                                             |
+{: .labeled}
+| 制約 | 説明 |
 | -------------------------- | ---------------------------------------------------------------- |
-| 手動操作が必要             | レプリカ数の増減は管理者が手動で行う                             |
-| 単一マシンに限定           | 1 台のマシン上でしかコンテナを増やせない                         |
+| 手動操作が必要 | レプリカ数の増減は管理者が手動で行う |
+| 単一マシンに限定 | 1 台のマシン上でしかコンテナを増やせない |
 | 負荷に応じた自動調整がない | CPU 使用率やリクエスト数に基づいた自動スケーリングの仕組みがない |
 
 Kubernetes のスケーリングは、これらの制約を解決します
 
-### 2 つの方向
+### [2 つの方向](#two-directions) {#two-directions}
 
 スケーリングには 2 つの方向があります
 
@@ -151,29 +153,30 @@ Pod に割り当てるリソース（CPU やメモリ）を変更する方法で
 
 垂直に強化することを<strong>スケールアップ</strong>、垂直に弱化することを<strong>スケールダウン</strong>と呼びます
 
-### なぜ水平スケーリングが中心か
+### [なぜ水平スケーリングが中心か](#why-horizontal-scaling) {#why-horizontal-scaling}
 
 Kubernetes は水平スケーリングを中心に設計されています
 
 水平スケーリングには、垂直スケーリングにはない利点があります
 
-| 観点           | 水平スケーリング                     | 垂直スケーリング                              |
+{: .labeled}
+| 観点 | 水平スケーリング | 垂直スケーリング |
 | -------------- | ------------------------------------ | --------------------------------------------- |
-| 上限           | ノードを追加すれば際限なくスケール可 | 1 台のノードのリソース上限に制約される        |
-| 可用性         | Pod が複数あるため、1 つの障害に強い | Pod が 1 つなら、障害時にサービスが停止する   |
-| 再起動の必要性 | 新しい Pod を追加するだけ            | リソース変更に Pod の再起動が必要な場合がある |
+| 上限 | ノードを追加すれば際限なくスケール可 | 1 台のノードのリソース上限に制約される |
+| 可用性 | Pod が複数あるため、1 つの障害に強い | Pod が 1 つなら、障害時にサービスが停止する |
+| 再起動の必要性 | 新しい Pod を追加するだけ | リソース変更に Pod の再起動が必要な場合がある |
 
 水平スケーリングは「同じ Pod を増やすだけ」というシンプルさがあり、あるべき状態のレプリカ数を変更するだけで実現できます
 
 ---
 
-## 手動スケーリング
+## [手動スケーリング](#manual-scaling) {#manual-scaling}
 
-### レプリカ数の変更
+### [レプリカ数の変更](#replica-count-change) {#replica-count-change}
 
 最も基本的なスケーリングは、<strong>レプリカ数を手動で変更する</strong>方法です
 
-[02-architecture](./02-architecture.md) で学んだ Reconciliation Loop を思い出してください
+[02-architecture](../02-architecture/) で学んだ Reconciliation Loop を思い出してください
 
 あるべき状態として「Pod を 3 つ動かす」と宣言されているとき、この数を「5 つ」に変更すれば、Reconciliation Loop が差分を検知し、新しい Pod を 2 つ作成します
 
@@ -193,36 +196,37 @@ Reconciliation Loop が Pod を 2 つ作成
 実際の状態 = Pod 5 つ → あるべき状態と一致
 ```
 
-新しく作成された Pod は、[03-scheduling](./03-scheduling.md) で学んだ Scheduler によって適切なノードに配置されます
+新しく作成された Pod は、[03-scheduling](../03-scheduling/) で学んだ Scheduler によって適切なノードに配置されます
 
-[04-service-discovery](./04-service-discovery.md) で学んだ EndpointSlice に新しい Pod が追加され、Service を通じてトラフィックが転送されます
+[04-service-discovery](../04-service-discovery/) で学んだ EndpointSlice に新しい Pod が追加され、Service を通じてトラフィックが転送されます
 
-### 手動スケーリングの限界
+### [手動スケーリングの限界](#manual-scaling-limitation) {#manual-scaling-limitation}
 
 手動スケーリングは仕組みとしてはシンプルですが、実用上の問題があります
 
-| 問題                | 説明                                                                       |
+{: .labeled}
+| 問題 | 説明 |
 | ------------------- | -------------------------------------------------------------------------- |
-| 判断の遅れ          | 負荷の急増に管理者が気づくまでに時間がかかる                               |
-| 24 時間の監視が必要 | 深夜や休日にも負荷の変動は起きるが、管理者は常に監視できない               |
-| 予測の困難さ        | 将来の負荷を正確に予測してレプリカ数を決めることは難しい                   |
-| スケールインの遅れ  | 負荷が下がった後も、管理者がレプリカ数を減らさなければリソースが無駄になる |
+| 判断の遅れ | 負荷の急増に管理者が気づくまでに時間がかかる |
+| 24 時間の監視が必要 | 深夜や休日にも負荷の変動は起きるが、管理者は常に監視できない |
+| 予測の困難さ | 将来の負荷を正確に予測してレプリカ数を決めることは難しい |
+| スケールインの遅れ | 負荷が下がった後も、管理者がレプリカ数を減らさなければリソースが無駄になる |
 
 これらの問題を解決するために、メトリクスに基づいてレプリカ数を自動で調整する仕組みが必要です
 
 ---
 
-## HPA（Horizontal Pod Autoscaler）
+## [HPA（Horizontal Pod Autoscaler）](#hpa) {#hpa}
 
-### HPA とは
+### [HPA とは](#what-is-hpa) {#what-is-hpa}
 
 <strong>Horizontal Pod Autoscaler（HPA）</strong>は、<strong>メトリクスに基づいてレプリカ数を自動で調整するコントローラ</strong>です
 
 HPA は、Pod の CPU 使用率やメモリ使用率などのメトリクスを定期的に確認し、あらかじめ設定した目標値との差に基づいて、レプリカ数を自動で増減させます
 
-### セルフヒーリングとの関係
+### [セルフヒーリングとの関係](#self-healing-relationship) {#self-healing-relationship}
 
-[05-self-healing](./05-self-healing.md) で学んだセルフヒーリングは、<strong>あるべき状態を「維持する」</strong>仕組みでした
+[05-self-healing](../05-self-healing/) で学んだセルフヒーリングは、<strong>あるべき状態を「維持する」</strong>仕組みでした
 
 「Pod を 3 つ動かす」という宣言に対して、Pod が 1 つ停止すれば自動で 3 つに戻します
 
@@ -242,7 +246,7 @@ HPA（このトピックで学ぶ仕組み）
 
 HPA があるべき状態を「5 つ」に変更した後、Pod が 1 つ停止すれば、セルフヒーリングが「5 つ」に戻します
 
-### HPA の動作の流れ
+### [HPA の動作の流れ](#hpa-operation-flow) {#hpa-operation-flow}
 
 HPA は、以下の流れで動作します
 
@@ -272,13 +276,13 @@ HPA は Deployment（または ReplicaSet）のレプリカ数を変更するだ
 
 ---
 
-## メトリクスに基づく判断
+## [メトリクスに基づく判断](#metrics-based-decision) {#metrics-based-decision}
 
 HPA は、何を基準にレプリカ数を決めるのでしょうか
 
 その基準となるのが、<strong>メトリクス</strong>です
 
-### メトリクスとは
+### [メトリクスとは](#what-is-metrics) {#what-is-metrics}
 
 <strong>メトリクス</strong>とは、システムの状態を数値化した<strong>測定値</strong>です
 
@@ -286,17 +290,17 @@ CPU 使用率、メモリ使用量、1 秒あたりのリクエスト数など�
 
 HPA は、これらのメトリクスを使って「今、Pod に負荷がかかっているか」を判断します
 
-### CPU 使用率を例にした判断
+### [CPU 使用率を例にした判断](#cpu-usage-decision-example) {#cpu-usage-decision-example}
 
 最も一般的なメトリクスは <strong>CPU 使用率</strong>です
 
-[03-scheduling](./03-scheduling.md) で、Pod にはリソース要求（requests）を設定できることを学びました
+[03-scheduling](../03-scheduling/) で、Pod にはリソース要求（requests）を設定できることを学びました
 
 CPU のリソース要求が 500m（0.5 コア）の Pod が、実際に 400m を使用している場合、CPU 使用率は 80% です
 
 HPA に「CPU 使用率の目標を 50% にする」と設定すれば、CPU 使用率が 50% を超えたときに Pod を増やし、50% を下回ったときに Pod を減らします
 
-### Metrics API
+### [Metrics API](#metrics-api) {#metrics-api}
 
 HPA がメトリクスを取得するには、メトリクスを収集して提供する仕組みが必要です
 
@@ -310,15 +314,16 @@ metrics-server は各ノードの kubelet からリソース使用量を収集�
 kubelet（ノード上） → メトリクスを報告 → metrics-server → Metrics API → HPA
 ```
 
-### メトリクスの種類
+### [メトリクスの種類](#metrics-types) {#metrics-types}
 
 HPA が使用できるメトリクスの種類は主に以下の通りです
 
-| 種類               | 説明                                             | 例                             |
+{: .labeled}
+| 種類 | 説明 | 例 |
 | ------------------ | ------------------------------------------------ | ------------------------------ |
-| リソースメトリクス | Pod の CPU やメモリの使用率                      | CPU 使用率 50%                 |
-| カスタムメトリクス | アプリケーション固有のメトリクス                 | 1 秒あたりのリクエスト数       |
-| 外部メトリクス     | クラスタ外部の監視システムから取得するメトリクス | メッセージキューのメッセージ数 |
+| リソースメトリクス | Pod の CPU やメモリの使用率 | CPU 使用率 50% |
+| カスタムメトリクス | アプリケーション固有のメトリクス | 1 秒あたりのリクエスト数 |
+| 外部メトリクス | クラスタ外部の監視システムから取得するメトリクス | メッセージキューのメッセージ数 |
 
 リソースメトリクスは Metrics API（metrics-server）から取得します
 
@@ -326,11 +331,11 @@ HPA が使用できるメトリクスの種類は主に以下の通りです
 
 ---
 
-## HPA のアルゴリズム
+## [HPA のアルゴリズム](#hpa-algorithm) {#hpa-algorithm}
 
 HPA は、具体的にどのようにレプリカ数を計算するのでしょうか
 
-### 計算式
+### [計算式](#calculation-formula) {#calculation-formula}
 
 HPA は以下の計算式で必要なレプリカ数を算出します
 
@@ -342,7 +347,7 @@ HPA は以下の計算式で必要なレプリカ数を算出します
 
 この計算式は「現在のメトリクス値が目標値からどれだけ離れているか」の比率でレプリカ数を調整するという考え方です
 
-### 具体例
+### [具体例](#concrete-examples) {#concrete-examples}
 
 <strong>スケールアウトの例（Pod を増やす）</strong>
 
@@ -374,7 +379,7 @@ Pod が 6 つに増えれば、負荷が分散され、平均 CPU 使用率は�
 
 HPA はレプリカ数を 6 から 3 に減らします
 
-### 許容範囲（tolerance）
+### [許容範囲（tolerance）](#tolerance) {#tolerance}
 
 メトリクスの値がわずかに変動するたびにレプリカ数が変わると、Pod が頻繁に作成・削除されてしまいます
 
@@ -382,7 +387,7 @@ HPA はレプリカ数を 6 から 3 に減らします
 
 計算結果の比率（現在のメトリクス値 / 目標メトリクス値）が 1.0 の前後 10% 以内（0.9〜1.1）であれば、HPA はスケーリングを行いません
 
-### HPA のマニフェスト例
+### [HPA のマニフェスト例](#hpa-manifest-example) {#hpa-manifest-example}
 
 HPA の仕組みを理解するために、マニフェストの例を見てみましょう
 
@@ -420,11 +425,11 @@ spec:
 
 ---
 
-## スケールアウトとスケールイン
+## [スケールアウトとスケールイン](#scale-out-and-scale-in) {#scale-out-and-scale-in}
 
 HPA のスケーリングは、増やす（スケールアウト）ときと減らす（スケールイン）ときで異なる性質を持ちます
 
-### スケールアウト（Pod を増やす）
+### [スケールアウト（Pod を増やす）](#scale-out) {#scale-out}
 
 負荷が急増した場合、迅速に Pod を増やす必要があります
 
@@ -434,7 +439,7 @@ HPA はスケールアウトに対して<strong>即応的</strong>に動作し�
 
 これにより、アクセスの急増に対して素早く対応できます
 
-### スケールイン（Pod を減らす）
+### [スケールイン（Pod を減らす）](#scale-in) {#scale-in}
 
 一方、負荷が下がった場合の Pod の削減には慎重さが必要です
 
@@ -444,7 +449,7 @@ HPA はスケールアウトに対して<strong>即応的</strong>に動作し�
 
 この不安定な状態を<strong>フラッピング</strong>と呼びます
 
-### 安定化ウィンドウ
+### [安定化ウィンドウ](#stabilization-window) {#stabilization-window}
 
 フラッピングを防ぐために、HPA には<strong>安定化ウィンドウ（stabilization window）</strong>が設定されています
 
@@ -464,22 +469,23 @@ HPA はスケールアウトに対して<strong>即応的</strong>に動作し�
 
 負荷の増加は即座に対応する必要があるため、遅延なくスケールアウトします
 
-### スケーリングの比較
+### [スケーリングの比較](#scaling-comparison) {#scaling-comparison}
 
-| 方向           | 安定化ウィンドウ（デフォルト） | 性質   | 理由                                                                       |
+{: .labeled}
+| 方向 | 安定化ウィンドウ（デフォルト） | 性質 | 理由 |
 | -------------- | ------------------------------ | ------ | -------------------------------------------------------------------------- |
-| スケールアウト | 0 秒（即座）                   | 即応的 | 負荷増加は迅速に対応しないとサービスに影響する                             |
-| スケールイン   | 300 秒（5 分）                 | 慎重   | 一時的な負荷低下でのフラッピング（レプリカ数の頻繁な増減の繰り返し）を防ぐ |
+| スケールアウト | 0 秒（即座） | 即応的 | 負荷増加は迅速に対応しないとサービスに影響する |
+| スケールイン | 300 秒（5 分） | 慎重 | 一時的な負荷低下でのフラッピング（レプリカ数の頻繁な増減の繰り返し）を防ぐ |
 
 この非対称な設計により、「増やすときは素早く、減らすときは慎重に」という安定したスケーリングが実現されます
 
 ---
 
-## 垂直スケーリング（対比として）
+## [垂直スケーリング（対比として）](#vertical-scaling) {#vertical-scaling}
 
 ここまで学んできた水平スケーリングに対して、垂直スケーリングについても触れておきます
 
-### 垂直スケーリングとは
+### [垂直スケーリングとは](#what-is-vertical-scaling) {#what-is-vertical-scaling}
 
 <strong>垂直スケーリング</strong>は、Pod の数を変えるのではなく、<strong>Pod に割り当てるリソース（CPU やメモリ）を変更する</strong>方法です
 
@@ -487,14 +493,15 @@ HPA はスケールアウトに対して<strong>即応的</strong>に動作し�
 
 Kubernetes では <strong>VPA（Vertical Pod Autoscaler）</strong>が、この垂直スケーリングを自動化する仕組みとして存在します
 
-### 水平スケーリングとの比較
+### [水平スケーリングとの比較](#horizontal-vs-vertical-scaling) {#horizontal-vs-vertical-scaling}
 
-| 観点           | 水平スケーリング（HPA）            | 垂直スケーリング（VPA）                  |
+{: .labeled}
+| 観点 | 水平スケーリング（HPA） | 垂直スケーリング（VPA） |
 | -------------- | ---------------------------------- | ---------------------------------------- |
-| 変更対象       | Pod の数                           | Pod のリソース割り当て                   |
-| スケール上限   | ノード追加で拡張可能               | ノードのリソース上限に制約               |
-| 可用性への影響 | Pod が分散するため影響が小さい     | リソース変更時に再起動が必要な場合がある |
-| 適用範囲       | ステートレスなアプリケーション向き | ステートフルなアプリケーション向き       |
+| 変更対象 | Pod の数 | Pod のリソース割り当て |
+| スケール上限 | ノード追加で拡張可能 | ノードのリソース上限に制約 |
+| 可用性への影響 | Pod が分散するため影響が小さい | リソース変更時に再起動が必要な場合がある |
+| 適用範囲 | ステートレスなアプリケーション向き | ステートフルなアプリケーション向き |
 
 Kubernetes は水平スケーリングを主軸に設計されています
 
@@ -504,11 +511,11 @@ HPA は Kubernetes のコア機能として組み込まれていますが、VPA 
 
 ---
 
-## スケーリングの全体像
+## [スケーリングの全体像](#scaling-overview) {#scaling-overview}
 
 ここまで学んだスケーリングの仕組みを、他のトピックとの関係を含めてまとめます
 
-### スケーリングと他の仕組みの連携
+### [スケーリングと他の仕組みの連携](#scaling-and-other-mechanisms) {#scaling-and-other-mechanisms}
 
 HPA が Pod の数を増やしたとき、以下の仕組みが連携して動作します
 
@@ -530,7 +537,7 @@ HPA がレプリカ数を 5 に変更した後、Pod が 1 つ停止すれば、
 
 HPA が設定したあるべき状態を、セルフヒーリングが維持します
 
-### スケーリングの流れ
+### [スケーリングの流れ](#scaling-flow) {#scaling-flow}
 
 全体の流れを見てみましょう
 
@@ -562,19 +569,20 @@ EndpointSlice が更新され、Service を通じてトラフィックが転送�
 負荷が分散され、CPU 使用率が目標値に近づく
 ```
 
-### Compose の限界への回答
+### [Compose の限界への回答](#compose-limitations-answer) {#compose-limitations-answer}
 
-[01-orchestration](./01-orchestration.md) で挙げた Compose の限界を振り返ります
+[01-orchestration](../01-orchestration/) で挙げた Compose の限界を振り返ります
 
-| Compose の制約             | Kubernetes の解決策                                        |
+{: .labeled}
+| Compose の制約 | Kubernetes の解決策 |
 | -------------------------- | ---------------------------------------------------------- |
-| 手動でのスケーリング       | HPA がメトリクスに基づいて自動でレプリカ数を調整する       |
-| 単一マシンでのスケーリング | 複数ノードにまたがって Pod を配置できる                    |
+| 手動でのスケーリング | HPA がメトリクスに基づいて自動でレプリカ数を調整する |
+| 単一マシンでのスケーリング | 複数ノードにまたがって Pod を配置できる |
 | 負荷に応じた自動調整がない | HPA のアルゴリズムが負荷に応じて動的にレプリカ数を計算する |
 
 ---
 
-## 次のトピックへ
+## [次のトピックへ](#next-topic) {#next-topic}
 
 このトピックでは、以下のことを学びました
 
@@ -594,53 +602,54 @@ Kubernetes に対して「何を、どのような状態にしたいか」を宣
 
 アプリケーションの更新やロールバックは、どのように行われるのでしょうか？
 
-次のトピック [07-declarative-management](./07-declarative-management.md) では、<strong>宣言的構成管理</strong>を学びます
+次のトピック [07-declarative-management](../07-declarative-management/) では、<strong>宣言的構成管理</strong>を学びます
 
 ここまで個別に学んだ全メカニズムを、宣言的なマニフェストとして統合する仕組みを見ていきます
 
 ---
 
-## 用語集
+## [用語集](#glossary) {#glossary}
 
-| 用語                                     | 説明                                                                                                      |
+{: .labeled}
+| 用語 | 説明 |
 | ---------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| スケーリング（Scaling）                  | システムの処理能力を負荷に応じて増減させること                                                            |
-| 水平スケーリング（Horizontal Scaling）   | Pod の数を増減させることで処理能力を調整する方法                                                          |
-| 垂直スケーリング（Vertical Scaling）     | Pod に割り当てるリソース（CPU やメモリ）を変更することで処理能力を調整する方法                            |
-| スケールアウト（Scale Out）              | Pod の数を増やすこと。水平スケーリングの拡張方向                                                          |
-| スケールイン（Scale In）                 | Pod の数を減らすこと。水平スケーリングの縮小方向                                                          |
-| HPA（Horizontal Pod Autoscaler）         | メトリクスに基づいて Pod のレプリカ数を自動で調整するコントローラ                                         |
-| メトリクス（Metrics）                    | システムの状態を数値化した測定値。CPU 使用率、メモリ使用量、リクエスト数など                              |
-| Metrics API                              | Pod やノードのリソース使用量を提供する Kubernetes の API                                                  |
-| metrics-server                           | Metrics API の実装。各ノードの kubelet からリソース使用量を収集する                                       |
-| リソースメトリクス（Resource Metrics）   | Pod の CPU やメモリの使用率を表すメトリクス                                                               |
-| カスタムメトリクス（Custom Metrics）     | アプリケーション固有のメトリクス。リクエスト数やキューの長さなど                                          |
-| 許容範囲（Tolerance）                    | メトリクス比率がこの範囲内であればスケーリングを行わない閾値。デフォルトは 0.1（10%）                     |
-| 安定化ウィンドウ（Stabilization Window） | スケーリング決定時に過去の推奨値を参照する期間。フラッピングを防ぐための仕組み                            |
-| フラッピング（Flapping）                 | Pod の数が短期間で増減を繰り返す不安定な状態                                                              |
-| VPA（Vertical Pod Autoscaler）           | Pod のリソース要求を自動で調整する仕組み。Kubernetes のコア機能ではなく、追加コンポーネントとして導入する |
-| レプリカ数（Replica Count）              | 同じ構成の Pod を何個動かすかを指定する数                                                                 |
+| スケーリング（Scaling） | システムの処理能力を負荷に応じて増減させること |
+| 水平スケーリング（Horizontal Scaling） | Pod の数を増減させることで処理能力を調整する方法 |
+| 垂直スケーリング（Vertical Scaling） | Pod に割り当てるリソース（CPU やメモリ）を変更することで処理能力を調整する方法 |
+| スケールアウト（Scale Out） | Pod の数を増やすこと。水平スケーリングの拡張方向 |
+| スケールイン（Scale In） | Pod の数を減らすこと。水平スケーリングの縮小方向 |
+| HPA（Horizontal Pod Autoscaler） | メトリクスに基づいて Pod のレプリカ数を自動で調整するコントローラ |
+| メトリクス（Metrics） | システムの状態を数値化した測定値。CPU 使用率、メモリ使用量、リクエスト数など |
+| Metrics API | Pod やノードのリソース使用量を提供する Kubernetes の API |
+| metrics-server | Metrics API の実装。各ノードの kubelet からリソース使用量を収集する |
+| リソースメトリクス（Resource Metrics） | Pod の CPU やメモリの使用率を表すメトリクス |
+| カスタムメトリクス（Custom Metrics） | アプリケーション固有のメトリクス。リクエスト数やキューの長さなど |
+| 許容範囲（Tolerance） | メトリクス比率がこの範囲内であればスケーリングを行わない閾値。デフォルトは 0.1（10%） |
+| 安定化ウィンドウ（Stabilization Window） | スケーリング決定時に過去の推奨値を参照する期間。フラッピングを防ぐための仕組み |
+| フラッピング（Flapping） | Pod の数が短期間で増減を繰り返す不安定な状態 |
+| VPA（Vertical Pod Autoscaler） | Pod のリソース要求を自動で調整する仕組み。Kubernetes のコア機能ではなく、追加コンポーネントとして導入する |
+| レプリカ数（Replica Count） | 同じ構成の Pod を何個動かすかを指定する数 |
 
 ---
 
-## 参考資料
+## [参考資料](#references) {#references}
 
 このページの内容は、以下のソースに基づいています
 
 <strong>Horizontal Pod Autoscaler</strong>
 
-- [Horizontal Pod Autoscaling](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
+- [Horizontal Pod Autoscaling](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/){:target="\_blank"}
   - HPA の仕組み、アルゴリズム、安定化ウィンドウの公式ドキュメント
 
-- [HorizontalPodAutoscaler Walkthrough](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/)
+- [HorizontalPodAutoscaler Walkthrough](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/){:target="\_blank"}
   - HPA の動作を順を追って説明する公式ドキュメント
 
 <strong>メトリクス</strong>
 
-- [Resource metrics pipeline](https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/)
+- [Resource metrics pipeline](https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/){:target="\_blank"}
   - metrics-server と Metrics API の公式ドキュメント
 
 <strong>ワークロード管理</strong>
 
-- [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
+- [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/){:target="\_blank"}
   - Deployment のレプリカ数管理の公式ドキュメント

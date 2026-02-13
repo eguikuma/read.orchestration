@@ -1,12 +1,13 @@
-<div align="right">
-<img src="https://img.shields.io/badge/AI-ASSISTED_STUDY-3b82f6?style=for-the-badge&labelColor=1e293b&logo=bookstack&logoColor=white" alt="AI Assisted Study" />
-</div>
+---
+layout: default
+title: CNI（Container Network Interface）
+---
 
-# appendix：CNI（Container Network Interface）
+# [appendix：CNI（Container Network Interface）](#cni) {#cni}
 
-## はじめに
+## [はじめに](#introduction) {#introduction}
 
-[04-service-discovery](../04-service-discovery.md) では、Kubernetes のネットワークモデルを学びました
+[04-service-discovery](../../04-service-discovery/) では、Kubernetes のネットワークモデルを学びました
 
 すべての Pod が固有の IP アドレスを持ち、NAT なしで他のすべての Pod と通信できるという要件を確認しました
 
@@ -28,7 +29,7 @@ bridge は 1 台のマシン内のネットワークスイッチであり、veth
 
 ---
 
-## このページで学ぶこと
+## [このページで学ぶこと](#what-you-will-learn) {#what-you-will-learn}
 
 - <strong>CNI の必要性</strong>
   - 単一ホストの bridge ネットワークではなぜクラスタネットワークを実現できないか
@@ -43,22 +44,22 @@ bridge は 1 台のマシン内のネットワークスイッチであり、veth
 
 ---
 
-## 目次
+## [目次](#table-of-contents) {#table-of-contents}
 
-1. [なぜ CNI が必要か](#なぜ-cni-が必要か)
-2. [CNI とは](#cni-とは)
-3. [CNI プラグインの役割](#cni-プラグインの役割)
-4. [CNI の動作フロー](#cni-の動作フロー)
-5. [オーバーレイネットワークとルーティング](#オーバーレイネットワークとルーティング)
-6. [代表的な CNI プラグイン](#代表的な-cni-プラグイン)
-7. [用語集](#用語集)
-8. [参考資料](#参考資料)
+1. [なぜ CNI が必要か](#why-cni)
+2. [CNI とは](#what-is-cni)
+3. [CNI プラグインの役割](#cni-plugin-role)
+4. [CNI の動作フロー](#cni-operation-flow)
+5. [オーバーレイネットワークとルーティング](#overlay-network-and-routing)
+6. [代表的な CNI プラグイン](#major-cni-plugins)
+7. [用語集](#glossary)
+8. [参考資料](#references)
 
 ---
 
-## なぜ CNI が必要か
+## [なぜ CNI が必要か](#why-cni) {#why-cni}
 
-### 単一ホストのコンテナネットワーク
+### [単一ホストのコンテナネットワーク](#single-host-container-network) {#single-host-container-network}
 
 前のシリーズでコンテナネットワークを学んだ方は、以下の仕組みを思い出すかもしれません
 
@@ -88,7 +89,7 @@ bridge は 1 台のマシン内のネットワークスイッチであり、veth
 
 この仕組みは、1 台のマシン内では正しく機能します
 
-### bridge の限界
+### [bridge の限界](#bridge-limitations) {#bridge-limitations}
 
 しかし、Kubernetes のクラスタは複数のノード（マシン）で構成されます
 
@@ -113,9 +114,9 @@ bridge は 1 台のマシン内に閉じた仕組みであるため、<strong>�
 
 Pod A から Pod B に通信しようとしても、パケットはノード 1 の bridge から出ることができません
 
-### Kubernetes のネットワーク要件
+### [Kubernetes のネットワーク要件](#kubernetes-network-requirements) {#kubernetes-network-requirements}
 
-[04-service-discovery](../04-service-discovery.md) で確認した通り、Kubernetes のネットワークモデルには以下の要件があります
+[04-service-discovery](../../04-service-discovery/) で確認した通り、Kubernetes のネットワークモデルには以下の要件があります
 
 - すべての Pod が固有の IP アドレスを持つ
 - すべての Pod は、NAT なしで他のすべての Pod と通信できる
@@ -123,23 +124,24 @@ Pod A から Pod B に通信しようとしても、パケットはノード 1 �
 
 これらの要件を満たすには、単一ホストの bridge ネットワークだけでは不十分です
 
-### 解決すべき課題
+### [解決すべき課題](#challenges-to-solve) {#challenges-to-solve}
 
 bridge の限界と Kubernetes の要件の間には、解決すべき課題があります
 
-| 課題                               | 説明                                                      |
+{: .labeled}
+| 課題 | 説明 |
 | ---------------------------------- | --------------------------------------------------------- |
-| IP アドレスの割り当て              | クラスタ全体で重複しない IP アドレスを各 Pod に割り当てる |
-| ネットワークインターフェースの設定 | Pod 内に仮想ネットワークインターフェースを作成する        |
-| ノード間ルーティングの設定         | 異なるノード上の Pod 間でパケットが届くようにする         |
+| IP アドレスの割り当て | クラスタ全体で重複しない IP アドレスを各 Pod に割り当てる |
+| ネットワークインターフェースの設定 | Pod 内に仮想ネットワークインターフェースを作成する |
+| ノード間ルーティングの設定 | 異なるノード上の Pod 間でパケットが届くようにする |
 
 これらの課題を解決するのが、<strong>CNI プラグイン</strong>です
 
 ---
 
-## CNI とは
+## [CNI とは](#what-is-cni) {#what-is-cni}
 
-### 仕様としての CNI
+### [仕様としての CNI](#cni-as-specification) {#cni-as-specification}
 
 <strong>CNI（Container Network Interface）</strong>は、コンテナランタイムがネットワークプラグインと連携するための<strong>仕様（specification）</strong>です
 
@@ -147,24 +149,25 @@ CNI 自体はソフトウェアでも実装でもありません
 
 「コンテナのネットワークをどのように構成するか」について、コンテナランタイムとネットワークプラグインの間の<strong>取り決め</strong>を定義したものです
 
-### CNI が定義する操作
+### [CNI が定義する操作](#cni-defined-operations) {#cni-defined-operations}
 
 CNI 仕様では、以下の操作が定義されています
 
-| 操作    | 説明                                          |
+{: .labeled}
+| 操作 | 説明 |
 | ------- | --------------------------------------------- |
-| ADD     | コンテナをネットワークに接続する              |
-| DEL     | コンテナをネットワークから切断する            |
-| CHECK   | コンテナのネットワーク接続が正常かを確認する  |
+| ADD | コンテナをネットワークに接続する |
+| DEL | コンテナをネットワークから切断する |
+| CHECK | コンテナのネットワーク接続が正常かを確認する |
 | VERSION | プラグインがサポートする CNI バージョンを返す |
 
 コンテナランタイムは、これらの操作を CNI プラグインに対して呼び出します
 
 CNI プラグインは実行可能ファイル（バイナリ）であり、コンテナランタイムから呼び出されると、指定された操作を実行して結果を返します
 
-### CRI との類似性
+### [CRI との類似性](#cri-similarity) {#cri-similarity}
 
-[02-architecture](../02-architecture.md) で、kubelet がコンテナランタイムと連携するために CRI（Container Runtime Interface）を使うことを学びました
+[02-architecture](../../02-architecture/) で、kubelet がコンテナランタイムと連携するために CRI（Container Runtime Interface）を使うことを学びました
 
 CRI は「コンテナの管理方法」をランタイムの実装から分離する仕組みでした
 
@@ -176,30 +179,32 @@ CNI は「ネットワークの構成方法」をプラグインの実装から�
 
 コンテナランタイムは CNI の仕様に従って操作を呼び出すだけで、その先のネットワークプラグインが何であるかを気にする必要がありません
 
-| インターフェース | 分離するもの           | 呼び出す側         | 呼び出される側                      |
+{: .labeled}
+| インターフェース | 分離するもの | 呼び出す側 | 呼び出される側 |
 | ---------------- | ---------------------- | ------------------ | ----------------------------------- |
-| CRI              | コンテナ管理の実装     | kubelet            | コンテナランタイム（containerd 等） |
-| CNI              | ネットワーク構成の実装 | コンテナランタイム | ネットワークプラグイン              |
+| CRI | コンテナ管理の実装 | kubelet | コンテナランタイム（containerd 等） |
+| CNI | ネットワーク構成の実装 | コンテナランタイム | ネットワークプラグイン |
 
 この分離により、ネットワークプラグインを変更しても、Kubernetes やコンテナランタイムのコードを変更する必要がありません
 
 ---
 
-## CNI プラグインの役割
+## [CNI プラグインの役割](#cni-plugin-role) {#cni-plugin-role}
 
-### 3 つの責務
+### [3 つの責務](#three-responsibilities) {#three-responsibilities}
 
 CNI プラグインは、Pod のネットワークを構成するために以下の 3 つの責務を担います
 
-| 責務                               | 説明                                                                 |
+{: .labeled}
+| 責務 | 説明 |
 | ---------------------------------- | -------------------------------------------------------------------- |
-| IP アドレスの割り当て              | Pod に固有の IP アドレスを割り当てる                                 |
-| ネットワークインターフェースの設定 | Pod 内に仮想ネットワークインターフェース（veth ペア等）を作成する    |
-| ルーティングの設定                 | Pod 間のトラフィックが正しく届くようにルーティングテーブルを設定する |
+| IP アドレスの割り当て | Pod に固有の IP アドレスを割り当てる |
+| ネットワークインターフェースの設定 | Pod 内に仮想ネットワークインターフェース（veth ペア等）を作成する |
+| ルーティングの設定 | Pod 間のトラフィックが正しく届くようにルーティングテーブルを設定する |
 
 これらの責務が、先ほど挙げた「解決すべき課題」に対応しています
 
-### IPAM（IP アドレス管理）
+### [IPAM（IP アドレス管理）](#ipam) {#ipam}
 
 IP アドレスの割り当ては、<strong>IPAM（IP Address Management）プラグイン</strong>と呼ばれるサブプラグインが担当します
 
@@ -209,7 +214,7 @@ IPAM プラグインの責務は、クラスタ全体で重複しない IP ア�
 
 メインの CNI プラグインがネットワークインターフェースの作成とルーティングの設定を行い、IPAM プラグインが IP アドレスの割り当てを行うという分担になっています
 
-### JSON による設定
+### [JSON による設定](#json-configuration) {#json-configuration}
 
 CNI プラグインは、コンテナランタイムから JSON 形式の設定を受け取ります
 
@@ -219,9 +224,9 @@ CNI プラグインは設定に従ってネットワークを構成し、結果�
 
 ---
 
-## CNI の動作フロー
+## [CNI の動作フロー](#cni-operation-flow) {#cni-operation-flow}
 
-### Pod 作成時のネットワーク構成
+### [Pod 作成時のネットワーク構成](#pod-network-setup) {#pod-network-setup}
 
 Pod が作成されるとき、ネットワークは以下の流れで構成されます
 
@@ -255,7 +260,7 @@ CNI プラグイン
 Pod がネットワーク通信可能
 ```
 
-### 各ステップの詳細
+### [各ステップの詳細](#step-details) {#step-details}
 
 <strong>ネットワーク namespace の作成</strong>
 
@@ -295,19 +300,19 @@ CNI プラグインは、Pod 宛てのトラフィックが正しく届くよう
 
 ノード間の Pod 通信を実現するために、適切なルーティングルールが追加されます
 
-### アーキテクチャ全体における位置づけ
+### [アーキテクチャ全体における位置づけ](#architecture-positioning) {#architecture-positioning}
 
-この動作フローは、[02-architecture](../02-architecture.md) で学んだ「kubelet が Pod を起動する」流れと、[04-service-discovery](../04-service-discovery.md) で学んだ「Pod が IP アドレスを持つ」状態をつなぐ、間の部分です
+この動作フローは、[02-architecture](../../02-architecture/) で学んだ「kubelet が Pod を起動する」流れと、[04-service-discovery](../../04-service-discovery/) で学んだ「Pod が IP アドレスを持つ」状態をつなぐ、間の部分です
 
-[02-architecture](../02-architecture.md) では、kubelet が CRI を通じてコンテナランタイムにコンテナの起動を依頼する流れを学びました
+[02-architecture](../../02-architecture/) では、kubelet が CRI を通じてコンテナランタイムにコンテナの起動を依頼する流れを学びました
 
 その流れの中で、コンテナランタイムが CNI プラグインを呼び出してネットワークを構成する部分が、この appendix で学んだ内容にあたります
 
 ---
 
-## オーバーレイネットワークとルーティング
+## [オーバーレイネットワークとルーティング](#overlay-network-and-routing) {#overlay-network-and-routing}
 
-### ノード間通信の課題
+### [ノード間通信の課題](#inter-node-communication-challenge) {#inter-node-communication-challenge}
 
 CNI プラグインは、同じノード内の Pod 同士のネットワーク構成だけでなく、<strong>異なるノード上の Pod 同士の通信</strong>も実現する必要があります
 
@@ -315,7 +320,7 @@ CNI プラグインは、同じノード内の Pod 同士のネットワーク�
 
 この課題に対して、CNI プラグインは大きく 2 つのアプローチを採用しています
 
-### オーバーレイネットワーク
+### [オーバーレイネットワーク](#overlay-network) {#overlay-network}
 
 <strong>オーバーレイネットワーク</strong>は、既存のネットワーク（物理ネットワーク）の上に、仮想的なネットワークを重ねる方式です
 
@@ -363,7 +368,7 @@ Pod A（10.244.1.5）──→ Pod B（10.244.2.8）に送信
 
 一方、カプセル化とデカプセル化の処理が追加されるため、わずかなオーバーヘッド（追加の処理負荷）が発生します
 
-### ルーティング方式
+### [ルーティング方式](#routing-method) {#routing-method}
 
 <strong>ルーティング方式</strong>は、カプセル化を行わず、標準的な IP ルーティングで Pod 間の通信を実現する方式です
 
@@ -390,12 +395,13 @@ Pod A（10.244.1.5）──→ Pod B（10.244.2.8）に送信
 
 すべてのネットワーク環境でこの方式が使えるわけではありません
 
-### 2 つのアプローチの比較
+### [2 つのアプローチの比較](#two-approaches-comparison) {#two-approaches-comparison}
 
-| アプローチ   | 転送の仕組み             | 利点                             | 必要な条件           |
+{: .labeled}
+| アプローチ | 転送の仕組み | 利点 | 必要な条件 |
 | ------------ | ------------------------ | -------------------------------- | -------------------- |
-| オーバーレイ | VXLAN 等によるカプセル化 | ネットワーク環境を問わず動作する | なし                 |
-| ルーティング | BGP 等による経路広報     | カプセル化のオーバーヘッドがない | ルーターの対応が必要 |
+| オーバーレイ | VXLAN 等によるカプセル化 | ネットワーク環境を問わず動作する | なし |
+| ルーティング | BGP 等による経路広報 | カプセル化のオーバーヘッドがない | ルーターの対応が必要 |
 
 どちらのアプローチも、CNI の仕様に準拠した CNI プラグインとして実装されています
 
@@ -403,17 +409,18 @@ Kubernetes から見れば、どちらのプラグインを使っても Pod は�
 
 ---
 
-## 代表的な CNI プラグイン
+## [代表的な CNI プラグイン](#major-cni-plugins) {#major-cni-plugins}
 
 CNI の仕様に準拠したプラグインはいくつか存在します
 
 ここでは、代表的なプラグインを簡単に紹介します
 
-| プラグイン | アプローチ                            | 特徴                                                         |
+{: .labeled}
+| プラグイン | アプローチ | 特徴 |
 | ---------- | ------------------------------------- | ------------------------------------------------------------ |
-| Flannel    | オーバーレイ（VXLAN）                 | 設定がシンプルで導入しやすい                                 |
-| Calico     | ルーティング（BGP）またはオーバーレイ | Network Policy によるトラフィック制御をサポートする          |
-| Cilium     | eBPF ベース                           | カーネルレベルでのネットワーク処理と高度な可観測性を提供する |
+| Flannel | オーバーレイ（VXLAN） | 設定がシンプルで導入しやすい |
+| Calico | ルーティング（BGP）またはオーバーレイ | Network Policy によるトラフィック制御をサポートする |
+| Cilium | eBPF ベース | カーネルレベルでのネットワーク処理と高度な可観測性を提供する |
 
 すべてのプラグインは同じ CNI 仕様に準拠しているため、<strong>Kubernetes から見れば互換性があります</strong>
 
@@ -425,33 +432,34 @@ CNI プラグインを変更しても、Pod のネットワークモデル（固
 
 ---
 
-## 用語集
+## [用語集](#glossary) {#glossary}
 
-| 用語                                        | 説明                                                                                                             |
+{: .labeled}
+| 用語 | 説明 |
 | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| CNI（Container Network Interface）          | コンテナランタイムがネットワークプラグインと連携するための仕様。ネットワーク構成の実装をプラグインとして分離する |
-| CNI プラグイン                              | CNI 仕様に準拠した実行可能ファイル。コンテナランタイムから呼び出され、Pod のネットワーク構成を行う               |
-| IPAM（IP Address Management）               | IP アドレスの割り当てを担当する CNI のサブプラグイン。クラスタ全体で重複しない IP アドレスを各 Pod に割り当てる  |
-| オーバーレイネットワーク（Overlay Network） | 既存のネットワークの上に仮想的なネットワークを重ねる方式。パケットをカプセル化して転送する                       |
-| VXLAN（Virtual Extensible LAN）             | オーバーレイネットワークで使用される代表的なカプセル化プロトコル                                                 |
-| BGP（Border Gateway Protocol）              | ルーティング方式で使用されるルーティングプロトコル。ネットワーク間の経路情報を交換する                           |
-| veth ペア                                   | 仮想的なネットワークケーブル。一方をコンテナ（Pod）内に、もう一方をホスト側のネットワークに接続する              |
+| CNI（Container Network Interface） | コンテナランタイムがネットワークプラグインと連携するための仕様。ネットワーク構成の実装をプラグインとして分離する |
+| CNI プラグイン | CNI 仕様に準拠した実行可能ファイル。コンテナランタイムから呼び出され、Pod のネットワーク構成を行う |
+| IPAM（IP Address Management） | IP アドレスの割り当てを担当する CNI のサブプラグイン。クラスタ全体で重複しない IP アドレスを各 Pod に割り当てる |
+| オーバーレイネットワーク（Overlay Network） | 既存のネットワークの上に仮想的なネットワークを重ねる方式。パケットをカプセル化して転送する |
+| VXLAN（Virtual Extensible LAN） | オーバーレイネットワークで使用される代表的なカプセル化プロトコル |
+| BGP（Border Gateway Protocol） | ルーティング方式で使用されるルーティングプロトコル。ネットワーク間の経路情報を交換する |
+| veth ペア | 仮想的なネットワークケーブル。一方をコンテナ（Pod）内に、もう一方をホスト側のネットワークに接続する |
 
 ---
 
-## 参考資料
+## [参考資料](#references) {#references}
 
 このページの内容は、以下のソースに基づいています
 
 <strong>CNI 仕様</strong>
 
-- [CNI Specification](https://github.com/containernetworking/cni/blob/main/SPEC.md)
+- [CNI Specification](https://github.com/containernetworking/cni/blob/main/SPEC.md){:target="\_blank"}
   - CNI の仕様を定義するリポジトリで、ADD / DEL / CHECK / VERSION の操作やプラグインのインターフェースが記載されている
 
 <strong>Kubernetes ネットワーキング</strong>
 
-- [Cluster Networking](https://kubernetes.io/docs/concepts/cluster-administration/networking/)
+- [Cluster Networking](https://kubernetes.io/docs/concepts/cluster-administration/networking/){:target="\_blank"}
   - Kubernetes のネットワークモデル（Pod ごとの IP、NAT なしの通信要件）の公式ドキュメント
 
-- [Network Plugins](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/)
+- [Network Plugins](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/){:target="\_blank"}
   - Kubernetes における CNI プラグインの使用方法の公式ドキュメント

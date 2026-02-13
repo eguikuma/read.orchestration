@@ -1,12 +1,13 @@
-<div align="right">
-<img src="https://img.shields.io/badge/AI-ASSISTED_STUDY-3b82f6?style=for-the-badge&labelColor=1e293b&logo=bookstack&logoColor=white" alt="AI Assisted Study" />
-</div>
+---
+layout: default
+title: デプロイ戦略の比較
+---
 
-# appendix：デプロイ戦略の比較
+# [appendix：デプロイ戦略の比較](#deployment-strategies) {#deployment-strategies}
 
-## はじめに
+## [はじめに](#introduction) {#introduction}
 
-[07-declarative-management](../07-declarative-management.md) では、Deployment によるローリングアップデートの仕組みを学びました
+[07-declarative-management](../../07-declarative-management/) では、Deployment によるローリングアップデートの仕組みを学びました
 
 古い Pod を 1 つずつ新しい Pod に置き換え、ダウンタイムなしでアプリケーションを更新できることを確認しました
 
@@ -18,7 +19,7 @@
 
 ---
 
-## このページで学ぶこと
+## [このページで学ぶこと](#what-you-will-learn) {#what-you-will-learn}
 
 - <strong>なぜ複数の戦略があるか</strong>
   - すべてのアプリケーションに最適な単一のデプロイ戦略は存在しないこと
@@ -35,35 +36,36 @@
 
 ---
 
-## 目次
+## [目次](#table-of-contents) {#table-of-contents}
 
-1. [なぜ複数の戦略があるか](#なぜ複数の戦略があるか)
-2. [Recreate（再作成）](#recreate再作成)
-3. [Rolling Update（ローリングアップデート）](#rolling-updateローリングアップデート)
-4. [Blue-Green デプロイ](#blue-green-デプロイ)
-5. [Canary デプロイ](#canary-デプロイ)
-6. [各戦略の比較](#各戦略の比較)
-7. [用語集](#用語集)
-8. [参考資料](#参考資料)
+1. [なぜ複数の戦略があるか](#why-multiple-strategies)
+2. [Recreate（再作成）](#recreate)
+3. [Rolling Update（ローリングアップデート）](#rolling-update-strategy)
+4. [Blue-Green デプロイ](#blue-green-deployment)
+5. [Canary デプロイ](#canary-deployment)
+6. [各戦略の比較](#strategies-comparison)
+7. [用語集](#glossary)
+8. [参考資料](#references)
 
 ---
 
-## なぜ複数の戦略があるか
+## [なぜ複数の戦略があるか](#why-multiple-strategies) {#why-multiple-strategies}
 
 すべてのアプリケーションに最適な単一のデプロイ戦略は存在しません
 
 その理由は、アプリケーションごとにデプロイに対する要件が異なるためです
 
-### 要件のトレードオフ
+### [要件のトレードオフ](#requirements-tradeoff) {#requirements-tradeoff}
 
 デプロイ戦略を選択する際に考慮すべき要件には、以下のようなものがあります
 
-| 要件                 | 説明                                                           |
+{: .labeled}
+| 要件 | 説明 |
 | -------------------- | -------------------------------------------------------------- |
-| ダウンタイムの許容度 | サービスが一時的に停止することを許容できるかどうか             |
-| ロールバックの速度   | 問題が発覚した際に、どれだけ速く以前のバージョンに戻せるか     |
-| リソースコスト       | デプロイ中に追加で必要となるコンピュータリソースの量           |
-| リスクの許容度       | 新バージョンの問題がユーザーに与える影響をどこまで許容できるか |
+| ダウンタイムの許容度 | サービスが一時的に停止することを許容できるかどうか |
+| ロールバックの速度 | 問題が発覚した際に、どれだけ速く以前のバージョンに戻せるか |
+| リソースコスト | デプロイ中に追加で必要となるコンピュータリソースの量 |
+| リスクの許容度 | 新バージョンの問題がユーザーに与える影響をどこまで許容できるか |
 
 これらの要件は互いにトレードオフの関係にあります
 
@@ -71,16 +73,17 @@
 
 リスクを最小限に抑えるには、段階的にトラフィックを移行する仕組みが必要であり、デプロイの複雑さが増します
 
-### 4 つの戦略
+### [4 つの戦略](#four-strategies) {#four-strategies}
 
 この appendix では、以下の 4 つのデプロイ戦略を取り上げます
 
-| 戦略           | 概要                                               |
+{: .labeled}
+| 戦略 | 概要 |
 | -------------- | -------------------------------------------------- |
-| Recreate       | 全 Pod を停止してから、全 Pod を起動する           |
-| Rolling Update | 古い Pod を 1 つずつ新しい Pod に置き換える        |
-| Blue-Green     | 2 つの環境を用意し、トラフィックを一度に切り替える |
-| Canary         | 少数の Pod で新バージョンを検証してから全展開する  |
+| Recreate | 全 Pod を停止してから、全 Pod を起動する |
+| Rolling Update | 古い Pod を 1 つずつ新しい Pod に置き換える |
+| Blue-Green | 2 つの環境を用意し、トラフィックを一度に切り替える |
+| Canary | 少数の Pod で新バージョンを検証してから全展開する |
 
 それぞれの戦略には、異なるトレードオフがあります
 
@@ -88,9 +91,9 @@
 
 ---
 
-## Recreate（再作成）
+## [Recreate（再作成）](#recreate) {#recreate}
 
-### 仕組み
+### [仕組み](#recreate-mechanism) {#recreate-mechanism}
 
 <strong>Recreate</strong> は、最もシンプルなデプロイ戦略です
 
@@ -113,7 +116,7 @@
 更新完了
 ```
 
-### 特徴
+### [特徴](#recreate-characteristics) {#recreate-characteristics}
 
 <strong>ダウンタイムが発生する</strong>
 
@@ -131,7 +134,7 @@ Recreate では、旧 Pod が全て停止した後に新 Pod が起動するた�
 
 旧 Pod と新 Pod が同時に存在しないため、追加のリソースを必要としません
 
-### 適したケース
+### [適したケース](#recreate-suitable-cases) {#recreate-suitable-cases}
 
 Recreate が適しているのは、旧バージョンと新バージョンが<strong>同時に動作できない</strong>場合です
 
@@ -139,7 +142,7 @@ Recreate が適しているのは、旧バージョンと新バージョンが<s
 
 このような場合、旧バージョンを完全に停止してからスキーマを変更し、新バージョンを起動する必要があります
 
-### Kubernetes での設定
+### [Kubernetes での設定](#configuring-kubernetes) {#configuring-kubernetes}
 
 Kubernetes の Deployment では、`strategy.type` を `Recreate` に設定することでこの戦略を使用できます
 
@@ -167,11 +170,11 @@ spec:
 
 ---
 
-## Rolling Update（ローリングアップデート）
+## [Rolling Update（ローリングアップデート）](#rolling-update-strategy) {#rolling-update-strategy}
 
-### 振り返り
+### [振り返り](#rolling-update-review) {#rolling-update-review}
 
-<strong>Rolling Update</strong> は、[07-declarative-management](../07-declarative-management.md) で学んだデプロイ戦略です
+<strong>Rolling Update</strong> は、[07-declarative-management](../../07-declarative-management/) で学んだデプロイ戦略です
 
 古い Pod を 1 つずつ新しい Pod に置き換え、常に一定数の Pod がトラフィックを処理し続けます
 
@@ -196,16 +199,17 @@ Pod v2 が Ready になったら、v1 の Pod を 1 つ削除
   ReplicaSet（v1）→ （Pod なし、履歴として保持）
 ```
 
-### 特徴の整理
+### [特徴の整理](#rolling-update-characteristics-summary) {#rolling-update-characteristics-summary}
 
-| 観点           | 内容                                                                  |
+{: .labeled}
+| 観点 | 内容 |
 | -------------- | --------------------------------------------------------------------- |
-| ダウンタイム   | なし（常に一定数の Pod がトラフィックを処理）                         |
-| ロールバック   | Deployment のリビジョン管理により、以前の ReplicaSet に段階的に戻せる |
-| リソースコスト | 中程度（maxSurge の分だけ一時的に追加の Pod が存在する）              |
-| バージョン共存 | あり（更新中、旧バージョンと新バージョンが一時的に共存する）          |
+| ダウンタイム | なし（常に一定数の Pod がトラフィックを処理） |
+| ロールバック | Deployment のリビジョン管理により、以前の ReplicaSet に段階的に戻せる |
+| リソースコスト | 中程度（maxSurge の分だけ一時的に追加の Pod が存在する） |
+| バージョン共存 | あり（更新中、旧バージョンと新バージョンが一時的に共存する） |
 
-### バージョン共存への注意
+### [バージョン共存への注意](#version-coexistence-caution) {#version-coexistence-caution}
 
 Rolling Update では、更新中に旧バージョンと新バージョンの Pod が<strong>一時的に共存</strong>します
 
@@ -215,14 +219,15 @@ Rolling Update では、更新中に旧バージョンと新バージョンの P
 
 たとえば、API のレスポンス形式を変更する場合、v1 と v2 のどちらのレスポンスを受け取ってもクライアントが正しく動作する必要があります
 
-### 制御パラメータ
+### [制御パラメータ](#control-parameters) {#control-parameters}
 
 宣言的構成管理で学んだ通り、Rolling Update の速度は 2 つのパラメータで制御します
 
-| パラメータ     | 説明                                          | デフォルト |
+{: .labeled}
+| パラメータ | 説明 | デフォルト |
 | -------------- | --------------------------------------------- | ---------- |
-| maxSurge       | あるべきレプリカ数を超えて追加できる Pod の数 | 25%        |
-| maxUnavailable | 更新中に利用不可になってよい Pod の数         | 25%        |
+| maxSurge | あるべきレプリカ数を超えて追加できる Pod の数 | 25% |
+| maxUnavailable | 更新中に利用不可になってよい Pod の数 | 25% |
 
 Rolling Update は Kubernetes の Deployment の<strong>デフォルト戦略</strong>です
 
@@ -230,9 +235,9 @@ Rolling Update は Kubernetes の Deployment の<strong>デフォルト戦略</s
 
 ---
 
-## Blue-Green デプロイ
+## [Blue-Green デプロイ](#blue-green-deployment) {#blue-green-deployment}
 
-### 仕組み
+### [仕組み](#blue-green-mechanism) {#blue-green-mechanism}
 
 <strong>Blue-Green デプロイ</strong>は、旧バージョン（<strong>Blue</strong>）と新バージョン（<strong>Green</strong>）の 2 つの環境を同時に用意し、準備が整ったらトラフィックを一度に切り替える戦略です
 
@@ -257,9 +262,9 @@ Rolling Update は Kubernetes の Deployment の<strong>デフォルト戦略</s
   Blue（v1）の Pod 群を削除（または待機）
 ```
 
-### Service のラベルセレクタによる実現
+### [Service のラベルセレクタによる実現](#service-label-selector-implementation) {#service-label-selector-implementation}
 
-Blue-Green デプロイは、[04-service-discovery](../04-service-discovery.md) や [07-declarative-management](../07-declarative-management.md) で学んだ<strong>ラベルセレクタ</strong>の仕組みを活用して実現できます
+Blue-Green デプロイは、[04-service-discovery](../../04-service-discovery/) や [07-declarative-management](../../07-declarative-management/) で学んだ<strong>ラベルセレクタ</strong>の仕組みを活用して実現できます
 
 Service はラベルセレクタで対象の Pod を選択します
 
@@ -303,7 +308,7 @@ spec:
 
 Service のセレクタを `version: v1` から `version: v2` に変更するだけで、トラフィックの転送先が Blue から Green に切り替わります
 
-### 特徴
+### [特徴](#blue-green-characteristics) {#blue-green-characteristics}
 
 <strong>ダウンタイムなし</strong>
 
@@ -323,7 +328,7 @@ Rolling Update と異なり、トラフィックが一度に切り替わるた�
 
 Blue 環境と Green 環境の両方を同時に稼働させるため、通常の 2 倍のリソースが必要です
 
-### Kubernetes のネイティブ機能ではない
+### [Kubernetes のネイティブ機能ではない](#not-kubernetes-native) {#not-kubernetes-native}
 
 Blue-Green デプロイは、Kubernetes の Deployment リソースの `strategy.type` として直接サポートされているわけではありません
 
@@ -331,9 +336,9 @@ Blue-Green デプロイは、Kubernetes の Deployment リソースの `strategy
 
 ---
 
-## Canary デプロイ
+## [Canary デプロイ](#canary-deployment) {#canary-deployment}
 
-### 名前の由来
+### [名前の由来](#canary-name-origin) {#canary-name-origin}
 
 <strong>Canary デプロイ</strong>の名前は、<strong>炭鉱のカナリア</strong>に由来します
 
@@ -345,7 +350,7 @@ Canary デプロイも同じ考え方です
 
 新バージョンの Pod を少数だけ先にデプロイし、全体に展開する前に問題を早期に検知します
 
-### 仕組み
+### [仕組み](#canary-mechanism) {#canary-mechanism}
 
 Canary デプロイでは、新バージョンの Pod を少数だけデプロイし、全トラフィックの一部だけを新バージョンに流します
 
@@ -365,7 +370,7 @@ Canary デプロイでは、新バージョンの Pod を少数だけデプロ�
   v1 Pod × 0、v2 Pod × 10（全トラフィックが v2 に流れる）
 ```
 
-### Kubernetes での実現方法
+### [Kubernetes での実現方法](#canary-kubernetes-implementation) {#canary-kubernetes-implementation}
 
 Kubernetes では、2 つの Deployment（旧バージョンと新バージョン）を同じ Service のラベルセレクタで束ねることで、Canary デプロイを実現できます
 
@@ -444,7 +449,7 @@ v1 が 9 Pod、v2 が 1 Pod であれば、v2 に流れるトラフィックは�
 
 新バージョンに問題がなければ、v2 の Deployment のレプリカ数を増やし、v1 のレプリカ数を減らしていきます
 
-### 特徴
+### [特徴](#canary-characteristics) {#canary-characteristics}
 
 <strong>段階的にリスクを検証できる</strong>
 
@@ -464,20 +469,21 @@ Rolling Update と同様に旧バージョンと新バージョンが共存し�
 
 ---
 
-## 各戦略の比較
+## [各戦略の比較](#strategies-comparison) {#strategies-comparison}
 
-### 比較表
+### [比較表](#comparison-table) {#comparison-table}
 
-| 観点             | Recreate                 | Rolling Update   | Blue-Green       | Canary           |
+{: .labeled}
+| 観点 | Recreate | Rolling Update | Blue-Green | Canary |
 | ---------------- | ------------------------ | ---------------- | ---------------- | ---------------- |
-| ダウンタイム     | あり                     | なし             | なし             | なし             |
-| ロールバック速度 | 遅い（再デプロイ）       | 中程度（段階的） | 即時（切り替え） | 速い（少数のみ） |
-| リソースコスト   | 低い                     | 中程度           | 高い（2 倍）     | 中程度           |
-| バージョン共存   | なし                     | あり（一時的）   | なし             | あり（制御下）   |
-| リスク           | 高い（全ユーザーに影響） | 中程度           | 低い             | 低い             |
-| 適したケース     | DB 移行等                | 一般的な更新     | 即時切替が必要   | リスク検証       |
+| ダウンタイム | あり | なし | なし | なし |
+| ロールバック速度 | 遅い（再デプロイ） | 中程度（段階的） | 即時（切り替え） | 速い（少数のみ） |
+| リソースコスト | 低い | 中程度 | 高い（2 倍） | 中程度 |
+| バージョン共存 | なし | あり（一時的） | なし | あり（制御下） |
+| リスク | 高い（全ユーザーに影響） | 中程度 | 低い | 低い |
+| 適したケース | DB 移行等 | 一般的な更新 | 即時切替が必要 | リスク検証 |
 
-### 各戦略が適したケース
+### [各戦略が適したケース](#suitable-cases-per-strategy) {#suitable-cases-per-strategy}
 
 <strong>Recreate</strong>
 
@@ -511,35 +517,36 @@ Kubernetes の Deployment のデフォルト戦略であり、追加の設定な
 
 ---
 
-## 用語集
+## [用語集](#glossary) {#glossary}
 
-| 用語                                | 説明                                                                                                                                             |
+{: .labeled}
+| 用語 | 説明 |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | デプロイ戦略（Deployment Strategy） | アプリケーションの新バージョンをリリースする際の方法。ダウンタイム、ロールバック速度、リソースコスト、リスクなどのトレードオフに基づいて選択する |
-| Recreate                            | 全ての既存 Pod を停止してから全ての新しい Pod を起動するデプロイ戦略。ダウンタイムが発生するが、旧バージョンと新バージョンの共存を避けられる     |
-| Rolling Update                      | 古い Pod を 1 つずつ新しい Pod に置き換えるデプロイ戦略。ダウンタイムなしで更新できるが、旧バージョンと新バージョンが一時的に共存する            |
-| Blue-Green デプロイ                 | 旧バージョン（Blue）と新バージョン（Green）の 2 つの環境を同時に用意し、トラフィックを一度に切り替えるデプロイ戦略                               |
-| Canary デプロイ                     | 新バージョンの Pod を少数だけデプロイし、トラフィックの一部で検証してから段階的に全展開するデプロイ戦略                                          |
-| Blue 環境                           | Blue-Green デプロイにおける旧バージョンの環境                                                                                                    |
-| Green 環境                          | Blue-Green デプロイにおける新バージョンの環境                                                                                                    |
-| ダウンタイム（Downtime）            | サービスがリクエストを処理できない期間                                                                                                           |
-| ロールバック（Rollback）            | 新バージョンに問題があった場合に、以前のバージョンに戻す操作                                                                                     |
-| トラフィック分配                    | Service がリクエストを複数の Pod に振り分ける仕組み。Canary デプロイでは Pod 数の比率でトラフィックのおおよその割合を制御する                    |
-| ラベルセレクタ（Label Selector）    | Service が対象の Pod を選択するために使用するラベルの条件。Blue-Green デプロイではセレクタの変更でトラフィックの転送先を切り替える               |
+| Recreate | 全ての既存 Pod を停止してから全ての新しい Pod を起動するデプロイ戦略。ダウンタイムが発生するが、旧バージョンと新バージョンの共存を避けられる |
+| Rolling Update | 古い Pod を 1 つずつ新しい Pod に置き換えるデプロイ戦略。ダウンタイムなしで更新できるが、旧バージョンと新バージョンが一時的に共存する |
+| Blue-Green デプロイ | 旧バージョン（Blue）と新バージョン（Green）の 2 つの環境を同時に用意し、トラフィックを一度に切り替えるデプロイ戦略 |
+| Canary デプロイ | 新バージョンの Pod を少数だけデプロイし、トラフィックの一部で検証してから段階的に全展開するデプロイ戦略 |
+| Blue 環境 | Blue-Green デプロイにおける旧バージョンの環境 |
+| Green 環境 | Blue-Green デプロイにおける新バージョンの環境 |
+| ダウンタイム（Downtime） | サービスがリクエストを処理できない期間 |
+| ロールバック（Rollback） | 新バージョンに問題があった場合に、以前のバージョンに戻す操作 |
+| トラフィック分配 | Service がリクエストを複数の Pod に振り分ける仕組み。Canary デプロイでは Pod 数の比率でトラフィックのおおよその割合を制御する |
+| ラベルセレクタ（Label Selector） | Service が対象の Pod を選択するために使用するラベルの条件。Blue-Green デプロイではセレクタの変更でトラフィックの転送先を切り替える |
 
 ---
 
-## 参考資料
+## [参考資料](#references) {#references}
 
 このページの内容は、以下のソースに基づいています
 
 <strong>Kubernetes 公式ドキュメント</strong>
 
-- [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
+- [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/){:target="\_blank"}
   - Deployment のデプロイ戦略（Recreate、RollingUpdate）の仕様と動作の公式ドキュメント
 
-- [Labels and Selectors](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
+- [Labels and Selectors](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/){:target="\_blank"}
   - ラベルとラベルセレクタの仕組みの公式ドキュメントで、Blue-Green デプロイや Canary デプロイの実現に使用される
 
-- [Services](https://kubernetes.io/docs/concepts/services-networking/service/)
+- [Services](https://kubernetes.io/docs/concepts/services-networking/service/){:target="\_blank"}
   - Service の仕様と、ラベルセレクタによる Pod の選択の公式ドキュメント

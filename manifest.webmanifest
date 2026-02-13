@@ -1,0 +1,16 @@
+{
+  "name": "read.orchestration",
+  "short_name": "read.orchestration",
+  "description": "「コンテナ群はどう協調させるか」を学びます",
+  "start_url": "/read.orchestration/",
+  "scope": "/read.orchestration/",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#D97757",
+  "icons": [
+    { "src": "/read.orchestration/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/read.orchestration/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/read.orchestration/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/read.orchestration/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

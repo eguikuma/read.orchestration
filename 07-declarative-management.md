@@ -1,12 +1,13 @@
-<div align="right">
-<img src="https://img.shields.io/badge/AI-ASSISTED_STUDY-3b82f6?style=for-the-badge&labelColor=1e293b&logo=bookstack&logoColor=white" alt="AI Assisted Study" />
-</div>
+---
+layout: default
+title: 宣言的構成管理
+---
 
-# 07-declarative-management：宣言的構成管理
+# [07-declarative-management：宣言的構成管理](#declarative-management) {#declarative-management}
 
-## はじめに
+## [はじめに](#introduction) {#introduction}
 
-前のトピック [06-scaling](./06-scaling.md) では、負荷に応じてあるべき状態を動的に変更するスケーリングの仕組みを学びました
+前のトピック [06-scaling](../06-scaling/) では、負荷に応じてあるべき状態を動的に変更するスケーリングの仕組みを学びました
 
 HPA がメトリクスを監視し、レプリカ数を自動で増減させることで、アクセスの急増にも自動で対応できることを確認しました
 
@@ -31,7 +32,7 @@ Kubernetes に対して「何を、どのような状態にしたいか」を、
 
 ---
 
-## 日常の例え
+## [日常の例え](#everyday-analogy) {#everyday-analogy}
 
 宣言的構成管理の考え方を、日常の例えで見てみましょう
 
@@ -81,7 +82,7 @@ Kubernetes のローリングアップデートも同じ仕組みです
 
 ---
 
-## このページで学ぶこと
+## [このページで学ぶこと](#what-you-will-learn) {#what-you-will-learn}
 
 このページでは、以下の概念を学びます
 
@@ -112,26 +113,26 @@ Kubernetes のローリングアップデートも同じ仕組みです
 
 ---
 
-## 目次
+## [目次](#table-of-contents) {#table-of-contents}
 
-1. [宣言的アプローチと命令的アプローチ](#宣言的アプローチと命令的アプローチ)
-2. [マニフェスト（あるべき状態の記述）](#マニフェストあるべき状態の記述)
-3. [Deployment（アプリケーションのライフサイクル管理）](#deploymentアプリケーションのライフサイクル管理)
-4. [ローリングアップデート](#ローリングアップデート)
-5. [ロールバック](#ロールバック)
-6. [ラベルとアノテーション](#ラベルとアノテーション)
-7. [Namespace によるリソース分離](#namespace-によるリソース分離)
-8. [GitOps（変更管理と継続的デプロイ）](#gitops変更管理と継続的デプロイ)
-9. [宣言的構成管理の全体像](#宣言的構成管理の全体像)
-10. [まとめ：このリポジトリで学んだこと](#まとめこのリポジトリで学んだこと)
-11. [用語集](#用語集)
-12. [参考資料](#参考資料)
+1. [宣言的アプローチと命令的アプローチ](#declarative-and-imperative-approaches)
+2. [マニフェスト（あるべき状態の記述）](#manifest)
+3. [Deployment（アプリケーションのライフサイクル管理）](#deployment)
+4. [ローリングアップデート](#rolling-update)
+5. [ロールバック](#rollback)
+6. [ラベルとアノテーション](#labels-and-annotations)
+7. [Namespace によるリソース分離](#namespace-resource-isolation)
+8. [GitOps（変更管理と継続的デプロイ）](#gitops)
+9. [宣言的構成管理の全体像](#declarative-management-overview)
+10. [まとめ：このリポジトリで学んだこと](#repository-learning-summary)
+11. [用語集](#glossary)
+12. [参考資料](#references)
 
 ---
 
-## 宣言的アプローチと命令的アプローチ
+## [宣言的アプローチと命令的アプローチ](#declarative-and-imperative-approaches) {#declarative-and-imperative-approaches}
 
-### 命令的アプローチ
+### [命令的アプローチ](#imperative-approach) {#imperative-approach}
 
 <strong>命令的アプローチ</strong>は、<strong>システムに対して「何をするか」を操作として指示する</strong>方法です
 
@@ -139,7 +140,7 @@ Kubernetes のローリングアップデートも同じ仕組みです
 
 命令的アプローチでは、管理者がシステムの現在の状態を把握し、目的の状態に至るまでの手順を考え、その手順を正しい順序で実行する必要があります
 
-### 宣言的アプローチ
+### [宣言的アプローチ](#declarative-approach) {#declarative-approach}
 
 <strong>宣言的アプローチ</strong>は、<strong>システムに対して「どうあるべきか」を状態として宣言する</strong>方法です
 
@@ -149,16 +150,17 @@ Kubernetes のローリングアップデートも同じ仕組みです
 
 Kubernetes が現在の状態と宣言された状態の差分を検知し、必要な操作を自動で実行します
 
-### 2 つのアプローチの比較
+### [2 つのアプローチの比較](#approaches-comparison) {#approaches-comparison}
 
-| 観点           | 命令的アプローチ                        | 宣言的アプローチ                        |
+{: .labeled}
+| 観点 | 命令的アプローチ | 宣言的アプローチ |
 | -------------- | --------------------------------------- | --------------------------------------- |
-| 指示する内容   | 操作（「〜しろ」）                      | 状態（「〜であるべき」）                |
-| 手順の管理     | 管理者が考える                          | Kubernetes が自動で決定                 |
-| 再実行の安全性 | 同じ操作を 2 回実行すると問題が起きうる | 同じ宣言を何度適用しても同じ状態になる  |
-| 障害時の復旧   | 復旧手順を管理者が実行する              | Kubernetes が自動で宣言された状態に戻す |
+| 指示する内容 | 操作（「〜しろ」） | 状態（「〜であるべき」） |
+| 手順の管理 | 管理者が考える | Kubernetes が自動で決定 |
+| 再実行の安全性 | 同じ操作を 2 回実行すると問題が起きうる | 同じ宣言を何度適用しても同じ状態になる |
+| 障害時の復旧 | 復旧手順を管理者が実行する | Kubernetes が自動で宣言された状態に戻す |
 
-### 冪等性
+### [冪等性](#idempotency) {#idempotency}
 
 宣言的アプローチの重要な特性が、<strong>冪等性（べきとうせい）</strong>です
 
@@ -170,9 +172,9 @@ Kubernetes が現在の状態と宣言された状態の差分を検知し、必
 
 冪等性があることで、「今の状態が正しいか分からなければ、宣言をもう一度適用すればよい」という安心感が生まれます
 
-### Desired State との関係
+### [Desired State との関係](#desired-state-relationship) {#desired-state-relationship}
 
-[02-architecture](./02-architecture.md) で導入した「あるべき状態（Desired State）」は、まさに宣言的アプローチの実現です
+[02-architecture](../02-architecture/) で導入した「あるべき状態（Desired State）」は、まさに宣言的アプローチの実現です
 
 管理者があるべき状態を宣言し、Kubernetes が Reconciliation Loop を通じて実際の状態をあるべき状態に収束させます
 
@@ -180,9 +182,9 @@ Kubernetes が現在の状態と宣言された状態の差分を検知し、必
 
 ---
 
-## マニフェスト（あるべき状態の記述）
+## [マニフェスト（あるべき状態の記述）](#manifest) {#manifest}
 
-### マニフェストとは
+### [マニフェストとは](#what-is-manifest) {#what-is-manifest}
 
 <strong>マニフェスト</strong>とは、<strong>あるべき状態を YAML 形式で記述したファイル</strong>です
 
@@ -190,7 +192,7 @@ Kubernetes が現在の状態と宣言された状態の差分を検知し、必
 
 Kubernetes は、マニフェストを受け取ると、その内容をあるべき状態として etcd に保存し、Reconciliation Loop を通じて実現します
 
-### マニフェストの基本構造
+### [マニフェストの基本構造](#manifest-structure) {#manifest-structure}
 
 マニフェストは、以下の 4 つのフィールドで構成されます
 
@@ -222,14 +224,15 @@ spec:
               memory: 128Mi
 ```
 
-| フィールド   | 説明                                             |
+{: .labeled}
+| フィールド | 説明 |
 | ------------ | ------------------------------------------------ |
-| `apiVersion` | 使用する API のバージョン                        |
-| `kind`       | リソースの種類（Deployment、Service、Pod など）  |
-| `metadata`   | リソースの名前やラベルなどの識別情報             |
-| `spec`       | あるべき状態の詳細（レプリカ数、コンテナの設定） |
+| `apiVersion` | 使用する API のバージョン |
+| `kind` | リソースの種類（Deployment、Service、Pod など） |
+| `metadata` | リソースの名前やラベルなどの識別情報 |
+| `spec` | あるべき状態の詳細（レプリカ数、コンテナの設定） |
 
-### 「設定ファイル」ではなく「状態の宣言」
+### [「設定ファイル」ではなく「状態の宣言」](#state-declaration-not-config) {#state-declaration-not-config}
 
 マニフェストは単なる設定ファイルではありません
 
@@ -239,7 +242,7 @@ spec:
 
 設定ファイルは「起動時に読み込まれて反映される」ものですが、マニフェストは「常にあるべき状態として参照され、差分があれば自動で修正される」ものです
 
-### マニフェストの適用
+### [マニフェストの適用](#manifest-application) {#manifest-application}
 
 マニフェストを API Server に送信すると、以下の流れで処理されます
 
@@ -265,9 +268,9 @@ Reconciliation Loop が実際の状態との差分を計算
 
 ---
 
-## Deployment（アプリケーションのライフサイクル管理）
+## [Deployment（アプリケーションのライフサイクル管理）](#deployment) {#deployment}
 
-### Deployment とは
+### [Deployment とは](#what-is-deployment) {#what-is-deployment}
 
 <strong>Deployment</strong>は、<strong>ReplicaSet を管理し、アプリケーションの更新とロールバックを制御する</strong>上位リソースです
 
@@ -275,7 +278,7 @@ Reconciliation Loop が実際の状態との差分を計算
 
 Deployment は、その ReplicaSet をさらに管理する階層です
 
-### Deployment → ReplicaSet → Pod の階層
+### [Deployment → ReplicaSet → Pod の階層](#deployment-hierarchy) {#deployment-hierarchy}
 
 Kubernetes のワークロード管理は、3 層の階層構造になっています
 
@@ -298,7 +301,7 @@ Deployment が ReplicaSet を自動的に作成し、ReplicaSet が Pod を自�
 
 管理者が ReplicaSet を直接操作する必要はありません
 
-### なぜ ReplicaSet を直接使わないか
+### [なぜ ReplicaSet を直接使わないか](#why-not-use-replica-set-directly) {#why-not-use-replica-set-directly}
 
 ReplicaSet は Pod のレプリカ数を維持する機能しか持ちません
 
@@ -308,9 +311,9 @@ Deployment は、ReplicaSet を複数管理することで、段階的な更新�
 
 ---
 
-## ローリングアップデート
+## [ローリングアップデート](#rolling-update) {#rolling-update}
 
-### Compose の限界
+### [Compose の限界](#compose-limitations) {#compose-limitations}
 
 前のシリーズでコンテナ管理を学んだ方は、Compose でアプリケーションを更新するとき、コンテナを停止して新しいイメージで再作成したことを思い出すかもしれません
 
@@ -318,13 +321,13 @@ Deployment は、ReplicaSet を複数管理することで、段階的な更新�
 
 Kubernetes の Deployment は、<strong>ローリングアップデート</strong>によってダウンタイムなしのアプリケーション更新を実現します
 
-### ローリングアップデートの仕組み
+### [ローリングアップデートの仕組み](#rolling-update-mechanism) {#rolling-update-mechanism}
 
 <strong>ローリングアップデート</strong>は、<strong>古い Pod を 1 つずつ新しい Pod に置き換える</strong>更新方法です
 
 すべての Pod を一度に停止するのではなく、一部の Pod を新しいバージョンに置き換えながら、残りの Pod がトラフィックを処理し続けます
 
-### 更新の流れ
+### [更新の流れ](#update-flow) {#update-flow}
 
 アプリケーションのコンテナイメージを `v1` から `v2` に更新する場合を見てみましょう
 
@@ -354,14 +357,15 @@ Pod v2 が Ready になったら、ReplicaSet（v1）の Pod を 1 つ削除
 
 このように、新しい ReplicaSet を段階的にスケールアップし、古い ReplicaSet を段階的にスケールダウンすることで、常に一定数の Pod がトラフィックを処理し続けます
 
-### maxSurge と maxUnavailable
+### [maxSurge と maxUnavailable](#max-surge-and-max-unavailable) {#max-surge-and-max-unavailable}
 
 ローリングアップデートの速度は、2 つのパラメータで制御します
 
-| パラメータ     | 説明                                          | デフォルト |
+{: .labeled}
+| パラメータ | 説明 | デフォルト |
 | -------------- | --------------------------------------------- | ---------- |
-| maxSurge       | あるべきレプリカ数を超えて追加できる Pod の数 | 25%        |
-| maxUnavailable | 更新中に利用不可になってよい Pod の数         | 25%        |
+| maxSurge | あるべきレプリカ数を超えて追加できる Pod の数 | 25% |
+| maxUnavailable | 更新中に利用不可になってよい Pod の数 | 25% |
 
 たとえば、レプリカ数が 4 の Deployment で、デフォルト値（25%）の場合を考えます
 
@@ -370,9 +374,9 @@ Pod v2 が Ready になったら、ReplicaSet（v1）の Pod を 1 つ削除
 
 これにより、常に 3 つ以上の Pod がトラフィックを処理しつつ、段階的に新しいバージョンに切り替わります
 
-### Service との連携
+### [Service との連携](#service-integration) {#service-integration}
 
-ローリングアップデートは、[04-service-discovery](./04-service-discovery.md) で学んだ Service と連携して動作します
+ローリングアップデートは、[04-service-discovery](../04-service-discovery/) で学んだ Service と連携して動作します
 
 新しい Pod が起動し、Readiness Probe に成功すると、EndpointSlice に追加されてトラフィックを受け始めます
 
@@ -382,9 +386,9 @@ Pod v2 が Ready になったら、ReplicaSet（v1）の Pod を 1 つ削除
 
 ---
 
-## ロールバック
+## [ロールバック](#rollback) {#rollback}
 
-### 更新が失敗した場合
+### [更新が失敗した場合](#update-failure) {#update-failure}
 
 アプリケーションを `v1` から `v2` に更新したものの、`v2` にバグがあった場合はどうなるでしょうか
 
@@ -392,7 +396,7 @@ Pod v2 が Ready になったら、ReplicaSet（v1）の Pod を 1 つ削除
 
 このような場合、以前の正常な状態に<strong>ロールバック</strong>（巻き戻し）する必要があります
 
-### Deployment のリビジョン管理
+### [Deployment のリビジョン管理](#deployment-revision-management) {#deployment-revision-management}
 
 Deployment は、過去の ReplicaSet を<strong>リビジョン（改訂履歴）</strong>として保持しています
 
@@ -404,7 +408,7 @@ Deployment
 
 マニフェストを変更して適用するたびに新しいリビジョンが作成されますが、古い ReplicaSet は削除されずに残ります
 
-### ロールバックの仕組み
+### [ロールバックの仕組み](#rollback-mechanism) {#rollback-mechanism}
 
 ロールバックは、<strong>あるべき状態を以前のリビジョンに戻す</strong>操作です
 
@@ -430,7 +434,7 @@ ReplicaSet（v2）のレプリカ数を減らす
 
 ロールバックもローリングアップデートと同じ段階的な切り替えで行われるため、ダウンタイムは発生しません
 
-### 宣言的操作としてのロールバック
+### [宣言的操作としてのロールバック](#rollback-as-declarative-operation) {#rollback-as-declarative-operation}
 
 ロールバックは「v2 を停止して v1 を起動しろ」という命令的な操作ではありません
 
@@ -440,9 +444,9 @@ Kubernetes は、新しいあるべき状態（v1）と現在の状態（v2）�
 
 ---
 
-## ラベルとアノテーション
+## [ラベルとアノテーション](#labels-and-annotations) {#labels-and-annotations}
 
-### ラベル
+### [ラベル](#label) {#label}
 
 <strong>ラベル（Label）</strong>は、Kubernetes のリソースに付与する<strong>キーと値のペア</strong>です
 
@@ -458,16 +462,17 @@ metadata:
 
 ラベルは Kubernetes の多くの仕組みで活用されています
 
-| 仕組み     | ラベルの役割                                     |
+{: .labeled}
+| 仕組み | ラベルの役割 |
 | ---------- | ------------------------------------------------ |
-| Service    | ラベルセレクタで対象の Pod を選択する            |
-| ReplicaSet | ラベルセレクタで管理する Pod を識別する          |
-| Scheduler  | nodeSelector でラベルに基づくノード選択を行う    |
-| HPA        | スケーリング対象の Deployment をラベルで特定する |
+| Service | ラベルセレクタで対象の Pod を選択する |
+| ReplicaSet | ラベルセレクタで管理する Pod を識別する |
+| Scheduler | nodeSelector でラベルに基づくノード選択を行う |
+| HPA | スケーリング対象の Deployment をラベルで特定する |
 
-ここまでのトピックで学んだ Service のラベルセレクタも、[03-scheduling](./03-scheduling.md) で学んだ nodeSelector も、すべてラベルの仕組みの上に成り立っています
+ここまでのトピックで学んだ Service のラベルセレクタも、[03-scheduling](../03-scheduling/) で学んだ nodeSelector も、すべてラベルの仕組みの上に成り立っています
 
-### アノテーション
+### [アノテーション](#annotation) {#annotation}
 
 <strong>アノテーション（Annotation）</strong>は、ラベルと同じくキーと値のペアですが、<strong>リソースの選択やフィルタリングには使われない</strong>点が異なります
 
@@ -484,9 +489,9 @@ metadata:
 
 ---
 
-## Namespace によるリソース分離
+## [Namespace によるリソース分離](#namespace-resource-isolation) {#namespace-resource-isolation}
 
-### Namespace とは
+### [Namespace とは](#what-is-namespace) {#what-is-namespace}
 
 <strong>Namespace</strong>は、クラスタ内のリソースを<strong>論理的にグループ化する</strong>仕組みです
 
@@ -513,7 +518,7 @@ metadata:
 
 Namespace ごとに独立した空間が提供されるためです
 
-### リソースクォータ
+### [リソースクォータ](#resource-quota) {#resource-quota}
 
 Namespace には<strong>リソースクォータ</strong>を設定できます
 
@@ -525,15 +530,15 @@ Namespace には<strong>リソースクォータ</strong>を設定できます
 
 ---
 
-## GitOps（変更管理と継続的デプロイ）
+## [GitOps（変更管理と継続的デプロイ）](#gitops) {#gitops}
 
-### マニフェストの変更管理
+### [マニフェストの変更管理](#manifest-change-management) {#manifest-change-management}
 
 マニフェストは YAML ファイルとして記述されるため、<strong>Git リポジトリで管理</strong>できます
 
 この手法を<strong>GitOps</strong>と呼びます
 
-### GitOps の考え方
+### [GitOps の考え方](#gitops-concept) {#gitops-concept}
 
 GitOps は、<strong>Git リポジトリをシステムのあるべき状態の唯一の情報源（Single Source of Truth）として扱う</strong>手法です
 
@@ -550,20 +555,21 @@ Git リポジトリ（マニフェストの変更履歴）
 Kubernetes クラスタ（Git の最新状態を反映）
 ```
 
-### 変更の追跡可能性
+### [変更の追跡可能性](#change-traceability) {#change-traceability}
 
 GitOps により、以下の情報が自動的に記録されます
 
-| 情報           | 記録方法                       |
+{: .labeled}
+| 情報 | 記録方法 |
 | -------------- | ------------------------------ |
-| 誰が変更したか | Git のコミットの著者           |
+| 誰が変更したか | Git のコミットの著者 |
 | いつ変更したか | Git のコミットのタイムスタンプ |
-| 何を変更したか | Git の差分（diff）             |
-| なぜ変更したか | Git のコミットメッセージ       |
+| 何を変更したか | Git の差分（diff） |
+| なぜ変更したか | Git のコミットメッセージ |
 
 これらの情報は、障害発生時の原因調査や、変更の監査に活用されます
 
-### サプライチェーンセキュリティとの接点
+### [サプライチェーンセキュリティとの接点](#supply-chain-security-connection) {#supply-chain-security-connection}
 
 前のシリーズでセキュリティを学んだ方は、サプライチェーンの信頼性について学んだことを思い出すかもしれません
 
@@ -577,9 +583,9 @@ Git の変更履歴により、クラスタの状態変更の完全な追跡が�
 
 ---
 
-## 宣言的構成管理の全体像
+## [宣言的構成管理の全体像](#declarative-management-overview) {#declarative-management-overview}
 
-### すべてがマニフェストで統合される
+### [すべてがマニフェストで統合される](#manifest-integration) {#manifest-integration}
 
 ここまでのトピックで学んだ仕組みは、すべてマニフェストを通じて統合されます
 
@@ -603,7 +609,7 @@ EndpointSlice が Pod を自動追跡し、kube-proxy がトラフィックを�
 
 メトリクスに基づいてレプリカ数が自動で調整されます
 
-### 宣言から実現までの流れ
+### [宣言から実現までの流れ](#declaration-to-realization-flow) {#declaration-to-realization-flow}
 
 管理者がマニフェストを適用してから、アプリケーションが稼働するまでの全体の流れです
 
@@ -647,26 +653,27 @@ API Server が etcd に保存（あるべき状態の登録）
 
 それ以降のすべての動作は、Kubernetes が自動で行います
 
-### Compose の限界からの完全な回答
+### [Compose の限界からの完全な回答](#compose-limitations-complete-answer) {#compose-limitations-complete-answer}
 
-[01-orchestration](./01-orchestration.md) で挙げた Compose の限界が、すべて解決されたことを確認しましょう
+[01-orchestration](../01-orchestration/) で挙げた Compose の限界が、すべて解決されたことを確認しましょう
 
-| Compose の限界                               | Kubernetes の解決策                                            | 関連トピック         |
+{: .labeled}
+| Compose の限界 | Kubernetes の解決策 | 関連トピック |
 | -------------------------------------------- | -------------------------------------------------------------- | -------------------- |
-| 単一マシンでの管理が前提                     | 複数ノードへの自動配置                                         | 03-scheduling        |
-| 自動復旧がない（restart は単純な再起動のみ） | 3 層のセルフヒーリング（Probe、ReplicaSet、Node コントローラ） | 05-self-healing      |
-| 手動でのスケーリング                         | HPA によるメトリクスに基づく自動スケーリング                   | 06-scaling           |
-| DNS が Docker 内部に限定                     | CoreDNS によるクラスタ全体のサービスディスカバリ               | 04-service-discovery |
-| ヘルスチェックが 1 種類のみ                  | Liveness / Readiness / Startup Probe の 3 種類                 | 05-self-healing      |
-| ローリングアップデートがない                 | Deployment によるダウンタイムなしの段階的更新                  | 07（本トピック）     |
+| 単一マシンでの管理が前提 | 複数ノードへの自動配置 | 03-scheduling |
+| 自動復旧がない（restart は単純な再起動のみ） | 3 層のセルフヒーリング（Probe、ReplicaSet、Node コントローラ） | 05-self-healing |
+| 手動でのスケーリング | HPA によるメトリクスに基づく自動スケーリング | 06-scaling |
+| DNS が Docker 内部に限定 | CoreDNS によるクラスタ全体のサービスディスカバリ | 04-service-discovery |
+| ヘルスチェックが 1 種類のみ | Liveness / Readiness / Startup Probe の 3 種類 | 05-self-healing |
+| ローリングアップデートがない | Deployment によるダウンタイムなしの段階的更新 | 07（本トピック） |
 
 ---
 
-## まとめ：このリポジトリで学んだこと
+## [まとめ：このリポジトリで学んだこと](#repository-learning-summary) {#repository-learning-summary}
 
 このリポジトリでは、<strong>コンテナオーケストレーション</strong>の仕組みを 7 つのトピックで学びました
 
-### 全トピックの振り返り
+### [全トピックの振り返り](#all-topics-review) {#all-topics-review}
 
 <strong>01-orchestration：オーケストレーションとは何か</strong>
 
@@ -710,23 +717,24 @@ HPA がメトリクスに基づいてレプリカ数を自動で調整し、セ�
 
 管理者はあるべき状態を宣言するだけで、Kubernetes が自動的にその実現と維持を行います
 
-### Desired State が貫く軸
+### [Desired State が貫く軸](#desired-state-axis) {#desired-state-axis}
 
 全 7 トピックを貫く中心概念は、<strong>あるべき状態（Desired State）</strong>です
 
-| あるべき状態の表現              | 関連する仕組み         |
+{: .labeled}
+| あるべき状態の表現 | 関連する仕組み |
 | ------------------------------- | ---------------------- |
-| 「Pod を 3 つ動かす」           | セルフヒーリング       |
-| 「この Pod をこのノードに配置」 | スケジューリング       |
-| 「この名前でアクセスできる」    | サービスディスカバリ   |
-| 「CPU 50% を目標にスケール」    | スケーリング           |
-| 「イメージは v2 であるべき」    | ローリングアップデート |
+| 「Pod を 3 つ動かす」 | セルフヒーリング |
+| 「この Pod をこのノードに配置」 | スケジューリング |
+| 「この名前でアクセスできる」 | サービスディスカバリ |
+| 「CPU 50% を目標にスケール」 | スケーリング |
+| 「イメージは v2 であるべき」 | ローリングアップデート |
 
 管理者は「何をしたいか」を宣言し、Kubernetes は「どうやって実現するか」を自動で処理します
 
 この分離が、Kubernetes のオーケストレーションの本質です
 
-### このリポジトリの位置づけ
+### [このリポジトリの位置づけ](#repository-positioning) {#repository-positioning}
 
 このリポジトリは、カーネル空間からアプリケーション層に至るまでの学習シリーズの一部です
 
@@ -742,60 +750,61 @@ HPA がメトリクスに基づいてレプリカ数を自動で調整し、セ�
 
 ---
 
-## 用語集
+## [用語集](#glossary) {#glossary}
 
-| 用語                                     | 説明                                                                                                                 |
+{: .labeled}
+| 用語 | 説明 |
 | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| 宣言的アプローチ（Declarative Approach） | システムに対して「どうあるべきか」を状態として記述し、システムがその実現を自動で行う管理方法                         |
-| 命令的アプローチ（Imperative Approach）  | システムに対して「何をするか」を操作として指示し、管理者が手順を制御する管理方法                                     |
-| マニフェスト（Manifest）                 | あるべき状態を YAML 形式で記述したファイル。Kubernetes に適用することで、その状態の実現を指示する                    |
-| 冪等性（Idempotency）                    | 同じ操作を何度実行しても結果が同じになる性質。宣言的アプローチの重要な特性                                           |
-| Deployment                               | ReplicaSet を管理し、アプリケーションの更新やロールバックを制御する上位リソース                                      |
-| ローリングアップデート（Rolling Update） | 古い Pod を 1 つずつ新しい Pod に置き換え、ダウンタイムなしでアプリケーションを更新する方法                          |
-| ロールバック（Rollback）                 | 更新に問題があった場合に、あるべき状態を以前のリビジョンに戻す操作                                                   |
-| リビジョン（Revision）                   | Deployment の変更履歴。過去の ReplicaSet として保持され、ロールバック時に参照される                                  |
-| maxSurge                                 | ローリングアップデート時に、あるべきレプリカ数を超えて追加できる Pod の数                                            |
-| maxUnavailable                           | ローリングアップデート時に、利用不可になってよい Pod の数                                                            |
-| ラベル（Label）                          | リソースに付与するキーと値のペア。リソースの選択、分類、フィルタリングに使用する                                     |
-| アノテーション（Annotation）             | リソースに付与するキーと値のペア。選択やフィルタリングには使われず、補足情報の付与に使用する                         |
-| Namespace                                | クラスタ内のリソースを論理的にグループ化する仕組み。同じクラスタ内で複数の環境やチームを分離するために使用する       |
-| リソースクォータ（Resource Quota）       | Namespace 内で使用できるリソースの上限を定義する仕組み                                                               |
-| GitOps                                   | Git リポジトリをシステムのあるべき状態の唯一の情報源として扱い、マニフェストの変更管理と継続的デプロイを実現する手法 |
-| Single Source of Truth（唯一の情報源）   | システムのあるべき状態を一箇所で管理し、それを正とする考え方。GitOps では Git リポジトリがこの役割を果たす           |
-| apiVersion                               | マニフェストで使用する Kubernetes API のバージョン                                                                   |
-| kind                                     | マニフェストで指定するリソースの種類（Deployment、Service、Pod など）                                                |
-| metadata                                 | マニフェストでリソースの名前、ラベル、アノテーションなどの識別情報を記述するフィールド                               |
-| spec                                     | マニフェストであるべき状態の詳細（レプリカ数、コンテナの設定など）を記述するフィールド                               |
+| 宣言的アプローチ（Declarative Approach） | システムに対して「どうあるべきか」を状態として記述し、システムがその実現を自動で行う管理方法 |
+| 命令的アプローチ（Imperative Approach） | システムに対して「何をするか」を操作として指示し、管理者が手順を制御する管理方法 |
+| マニフェスト（Manifest） | あるべき状態を YAML 形式で記述したファイル。Kubernetes に適用することで、その状態の実現を指示する |
+| 冪等性（Idempotency） | 同じ操作を何度実行しても結果が同じになる性質。宣言的アプローチの重要な特性 |
+| Deployment | ReplicaSet を管理し、アプリケーションの更新やロールバックを制御する上位リソース |
+| ローリングアップデート（Rolling Update） | 古い Pod を 1 つずつ新しい Pod に置き換え、ダウンタイムなしでアプリケーションを更新する方法 |
+| ロールバック（Rollback） | 更新に問題があった場合に、あるべき状態を以前のリビジョンに戻す操作 |
+| リビジョン（Revision） | Deployment の変更履歴。過去の ReplicaSet として保持され、ロールバック時に参照される |
+| maxSurge | ローリングアップデート時に、あるべきレプリカ数を超えて追加できる Pod の数 |
+| maxUnavailable | ローリングアップデート時に、利用不可になってよい Pod の数 |
+| ラベル（Label） | リソースに付与するキーと値のペア。リソースの選択、分類、フィルタリングに使用する |
+| アノテーション（Annotation） | リソースに付与するキーと値のペア。選択やフィルタリングには使われず、補足情報の付与に使用する |
+| Namespace | クラスタ内のリソースを論理的にグループ化する仕組み。同じクラスタ内で複数の環境やチームを分離するために使用する |
+| リソースクォータ（Resource Quota） | Namespace 内で使用できるリソースの上限を定義する仕組み |
+| GitOps | Git リポジトリをシステムのあるべき状態の唯一の情報源として扱い、マニフェストの変更管理と継続的デプロイを実現する手法 |
+| Single Source of Truth（唯一の情報源） | システムのあるべき状態を一箇所で管理し、それを正とする考え方。GitOps では Git リポジトリがこの役割を果たす |
+| apiVersion | マニフェストで使用する Kubernetes API のバージョン |
+| kind | マニフェストで指定するリソースの種類（Deployment、Service、Pod など） |
+| metadata | マニフェストでリソースの名前、ラベル、アノテーションなどの識別情報を記述するフィールド |
+| spec | マニフェストであるべき状態の詳細（レプリカ数、コンテナの設定など）を記述するフィールド |
 
 ---
 
-## 参考資料
+## [参考資料](#references) {#references}
 
 このページの内容は、以下のソースに基づいています
 
 <strong>宣言的管理</strong>
 
-- [Declarative Management of Kubernetes Objects Using Configuration Files](https://kubernetes.io/docs/tasks/manage-kubernetes-objects/declarative-config/)
+- [Declarative Management of Kubernetes Objects Using Configuration Files](https://kubernetes.io/docs/tasks/manage-kubernetes-objects/declarative-config/){:target="\_blank"}
   - マニフェストによる宣言的なリソース管理の公式ドキュメント
 
-- [Object Management](https://kubernetes.io/docs/concepts/overview/working-with-objects/object-management/)
+- [Object Management](https://kubernetes.io/docs/concepts/overview/working-with-objects/object-management/){:target="\_blank"}
   - 命令的アプローチと宣言的アプローチの比較の公式ドキュメント
 
 <strong>Deployment</strong>
 
-- [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
+- [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/){:target="\_blank"}
   - Deployment の仕組み、ローリングアップデート、ロールバックの公式ドキュメント
 
 <strong>リソース管理</strong>
 
-- [Labels and Selectors](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
+- [Labels and Selectors](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/){:target="\_blank"}
   - ラベルとラベルセレクタの公式ドキュメント
 
-- [Annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/)
+- [Annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/){:target="\_blank"}
   - アノテーションの公式ドキュメント
 
-- [Namespaces](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)
+- [Namespaces](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/){:target="\_blank"}
   - Namespace の公式ドキュメント
 
-- [Resource Quotas](https://kubernetes.io/docs/concepts/policy/resource-quotas/)
+- [Resource Quotas](https://kubernetes.io/docs/concepts/policy/resource-quotas/){:target="\_blank"}
   - リソースクォータの公式ドキュメント

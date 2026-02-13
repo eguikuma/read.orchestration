@@ -1,12 +1,13 @@
-<div align="right">
-<img src="https://img.shields.io/badge/AI-ASSISTED_STUDY-3b82f6?style=for-the-badge&labelColor=1e293b&logo=bookstack&logoColor=white" alt="AI Assisted Study" />
-</div>
+---
+layout: default
+title: サービスディスカバリ
+---
 
-# 04-service-discovery：サービスディスカバリ
+# [04-service-discovery：サービスディスカバリ](#service-discovery) {#service-discovery}
 
-## はじめに
+## [はじめに](#introduction) {#introduction}
 
-前のトピック [03-scheduling](./03-scheduling.md) では、Scheduler が Pod をどのノードに配置するかを決定する仕組みを学びました
+前のトピック [03-scheduling](../03-scheduling/) では、Scheduler が Pod をどのノードに配置するかを決定する仕組みを学びました
 
 フィルタリングとスコアリングの 2 段階アルゴリズム、リソース要求による配置判断、ラベルや Node Affinity、Taint と Toleration によるノード選択を確認しました
 
@@ -26,7 +27,7 @@ Pod 同士がどのように互いを発見し、安定した通信を実現す�
 
 ---
 
-## 日常の例え
+## [日常の例え](#everyday-analogy) {#everyday-analogy}
 
 サービスディスカバリの考え方を、日常の例えで見てみましょう
 
@@ -68,7 +69,7 @@ Pod は Service の名前（たとえば `database`）を指定するだけで�
 
 ---
 
-## このページで学ぶこと
+## [このページで学ぶこと](#what-you-will-learn) {#what-you-will-learn}
 
 このページでは、以下の概念を学びます
 
@@ -102,28 +103,28 @@ Pod は Service の名前（たとえば `database`）を指定するだけで�
 
 ---
 
-## 目次
+## [目次](#table-of-contents) {#table-of-contents}
 
-1. [Pod のネットワークモデル](#pod-のネットワークモデル)
-2. [IP アドレスの不安定性](#ip-アドレスの不安定性)
-3. [Service（安定したアクセス先）](#service安定したアクセス先)
-4. [EndpointSlice（Pod の追跡）](#endpointslicepod-の追跡)
-5. [kube-proxy（トラフィックの転送）](#kube-proxyトラフィックの転送)
-6. [DNS によるサービスディスカバリ](#dns-によるサービスディスカバリ)
-7. [CoreDNS（クラスタの DNS サーバー）](#corednsクラスタの-dns-サーバー)
-8. [Service の種類](#service-の種類)
-9. [サービスディスカバリの全体像](#サービスディスカバリの全体像)
-10. [次のトピックへ](#次のトピックへ)
-11. [用語集](#用語集)
-12. [参考資料](#参考資料)
+1. [Pod のネットワークモデル](#pod-network-model)
+2. [IP アドレスの不安定性](#ip-address-instability)
+3. [Service（安定したアクセス先）](#service)
+4. [EndpointSlice（Pod の追跡）](#endpoint-slice)
+5. [kube-proxy（トラフィックの転送）](#kube-proxy-traffic)
+6. [DNS によるサービスディスカバリ](#dns-based-service-discovery)
+7. [CoreDNS（クラスタの DNS サーバー）](#coredns)
+8. [Service の種類](#service-types)
+9. [サービスディスカバリの全体像](#service-discovery-overview)
+10. [次のトピックへ](#next-topic)
+11. [用語集](#glossary)
+12. [参考資料](#references)
 
 ---
 
-## Pod のネットワークモデル
+## [Pod のネットワークモデル](#pod-network-model) {#pod-network-model}
 
 サービスディスカバリを理解するために、まず Kubernetes のネットワークモデルを確認します
 
-### Pod ごとの IP アドレス
+### [Pod ごとの IP アドレス](#pod-ip-address) {#pod-ip-address}
 
 Kubernetes では、<strong>すべての Pod が固有の IP アドレスを持ちます</strong>
 
@@ -133,21 +134,22 @@ Kubernetes では、<strong>すべての Pod が固有の IP アドレスを持�
 
 Kubernetes はこの問題を、Pod ごとに独立した IP アドレスを割り当てることで解決しています
 
-### このモデルの利点
+### [このモデルの利点](#pod-network-model-benefits) {#pod-network-model-benefits}
 
 Pod ごとに IP アドレスを持つことで、以下の利点があります
 
-| 利点                     | 説明                                                                       |
+{: .labeled}
+| 利点 | 説明 |
 | ------------------------ | -------------------------------------------------------------------------- |
-| ポートの競合がない       | 各 Pod が独立した IP を持つため、同じポート番号を使っても競合しない        |
-| アプリケーションの簡素化 | ポートの動的割り当てや管理をアプリケーション側で行う必要がない             |
-| 予測可能なアドレス体系   | Pod、Service、ノードがそれぞれ別の IP 範囲を持ち、アドレス体系が整理される |
+| ポートの競合がない | 各 Pod が独立した IP を持つため、同じポート番号を使っても競合しない |
+| アプリケーションの簡素化 | ポートの動的割り当てや管理をアプリケーション側で行う必要がない |
+| 予測可能なアドレス体系 | Pod、Service、ノードがそれぞれ別の IP 範囲を持ち、アドレス体系が整理される |
 
 前のシリーズでコンテナのネットワーキングを学んだ方は、bridge や veth といった仕組みを思い出すかもしれません
 
 Kubernetes のネットワークは、これらのコンテナネットワーク技術を基盤として、クラスタ全体に拡張したものです
 
-### Kubernetes のネットワーク要件
+### [Kubernetes のネットワーク要件](#kubernetes-network-requirements) {#kubernetes-network-requirements}
 
 Kubernetes のネットワークモデルには、以下の要件があります
 
@@ -161,28 +163,29 @@ Kubernetes のネットワークモデルには、以下の要件があります
 
 ---
 
-## IP アドレスの不安定性
+## [IP アドレスの不安定性](#ip-address-instability) {#ip-address-instability}
 
 Pod の IP アドレスには、大きな問題があります
 
 <strong>Pod は再作成されるたびに新しい IP アドレスが割り当てられます</strong>
 
-### なぜ IP アドレスが変わるのか
+### [なぜ IP アドレスが変わるのか](#why-ip-changes) {#why-ip-changes}
 
 Pod はさまざまな理由で再作成されます
 
-| 理由                   | 状況                                                       |
+{: .labeled}
+| 理由 | 状況 |
 | ---------------------- | ---------------------------------------------------------- |
-| ノードの障害           | ノードがダウンし、Pod が別のノードで再作成される           |
-| スケーリング           | Pod の数が増減し、新しい Pod が作成される                  |
+| ノードの障害 | ノードがダウンし、Pod が別のノードで再作成される |
+| スケーリング | Pod の数が増減し、新しい Pod が作成される |
 | アプリケーションの更新 | ローリングアップデートで古い Pod が新しい Pod に置き換わる |
-| ヘルスチェックの失敗   | Pod が異常と判断され、再起動または再作成される             |
+| ヘルスチェックの失敗 | Pod が異常と判断され、再起動または再作成される |
 
 再作成された Pod には新しい IP アドレスが割り当てられます
 
 元の IP アドレスは使われなくなり、新しい IP アドレスは以前とは異なります
 
-### 直接通信の問題
+### [直接通信の問題](#direct-communication-problems) {#direct-communication-problems}
 
 もし Pod A が Pod B の IP アドレスを直接使って通信していたらどうなるでしょうか
 
@@ -203,13 +206,13 @@ Pod A ──→ 10.1.2.3（Pod B の旧 IP）──→ 通信失敗
 
 ---
 
-## Service（安定したアクセス先）
+## [Service（安定したアクセス先）](#service) {#service}
 
 <strong>Service</strong>は、<strong>Pod の集合に対する安定したアクセス先を提供する抽象化</strong>です
 
 日常の例えで言えば、部門の代表電話番号に相当します
 
-### ClusterIP
+### [ClusterIP](#cluster-ip) {#cluster-ip}
 
 Service を作成すると、<strong>ClusterIP</strong>と呼ばれる仮想 IP アドレスが割り当てられます
 
@@ -227,7 +230,7 @@ Pod A は Service の ClusterIP に通信するだけで、背後にいる Pod B
 
 Pod が再作成されても、Service の ClusterIP は変わらないため、Pod A は何も変更する必要がありません
 
-### ラベルセレクタによる Pod の選択
+### [ラベルセレクタによる Pod の選択](#label-selector-pod-selection) {#label-selector-pod-selection}
 
 Service は、どの Pod に通信を転送するかを<strong>ラベルセレクタ</strong>で決めます
 
@@ -252,7 +255,7 @@ spec:
 
 Pod が追加されれば自動的に転送先に加わり、Pod が削除されれば自動的に転送先から外れます
 
-### あるべき状態と Service
+### [あるべき状態と Service](#desired-state-and-service) {#desired-state-and-service}
 
 Service もまた、あるべき状態の一部です
 
@@ -262,13 +265,13 @@ Service もまた、あるべき状態の一部です
 
 ---
 
-## EndpointSlice（Pod の追跡）
+## [EndpointSlice（Pod の追跡）](#endpoint-slice) {#endpoint-slice}
 
 Service がどの Pod にトラフィックを転送するかを決めるには、「今どの Pod が動いているか」を常に把握する必要があります
 
 この追跡を担うのが、<strong>EndpointSlice</strong>です
 
-### EndpointSlice の役割
+### [EndpointSlice の役割](#endpoint-slice-role) {#endpoint-slice-role}
 
 <strong>EndpointSlice</strong>は、Service のラベルセレクタに一致する<strong>Pod の IP アドレスとポート番号のリスト</strong>です
 
@@ -286,7 +289,7 @@ EndpointSlice
   └── 10.1.4.5:8080（Pod D、ノード 3）
 ```
 
-### 自動更新
+### [自動更新](#auto-update) {#auto-update}
 
 EndpointSlice は、Pod の状態に応じて自動的に更新されます
 
@@ -310,7 +313,7 @@ Pod が回復すれば、再び EndpointSlice に追加されます
 
 ---
 
-## kube-proxy（トラフィックの転送）
+## [kube-proxy（トラフィックの転送）](#kube-proxy-traffic) {#kube-proxy-traffic}
 
 Service の ClusterIP は仮想的な IP アドレスであり、特定のネットワークインターフェースに紐付いていません
 
@@ -318,13 +321,13 @@ Service の ClusterIP は仮想的な IP アドレスであり、特定のネッ
 
 これを実現するのが、<strong>kube-proxy</strong>です
 
-### kube-proxy の役割
+### [kube-proxy の役割](#kube-proxy-role) {#kube-proxy-role}
 
-前のトピック [02-architecture](./02-architecture.md) で、kube-proxy は各ノード上で動作し、ネットワークルールを管理するコンポーネントであると学びました
+前のトピック [02-architecture](../02-architecture/) で、kube-proxy は各ノード上で動作し、ネットワークルールを管理するコンポーネントであると学びました
 
 kube-proxy は、<strong>Service の ClusterIP 宛てのトラフィックを、EndpointSlice に記録されている実際の Pod に転送する</strong>役割を担います
 
-### トラフィック転送の仕組み
+### [トラフィック転送の仕組み](#traffic-forwarding-mechanism) {#traffic-forwarding-mechanism}
 
 kube-proxy は、以下の流れでトラフィックを転送します
 
@@ -334,7 +337,7 @@ kube-proxy は、以下の流れでトラフィックを転送します
 4. EndpointSlice に記録されている Pod の中から 1 つを選ぶ
 5. トラフィックを選ばれた Pod に転送する
 
-### 負荷分散
+### [負荷分散](#load-balancing) {#load-balancing}
 
 Service の背後に複数の Pod がある場合、kube-proxy は<strong>トラフィックを複数の Pod に振り分けます</strong>
 
@@ -346,7 +349,7 @@ Service と kube-proxy が連携して、トラフィックを自動的に振り
 
 ---
 
-## DNS によるサービスディスカバリ
+## [DNS によるサービスディスカバリ](#dns-based-service-discovery) {#dns-based-service-discovery}
 
 ここまでで、Service が安定した ClusterIP を提供し、kube-proxy がトラフィックを転送することを学びました
 
@@ -356,7 +359,7 @@ IP アドレスは覚えにくく、Service が再作成されれば ClusterIP �
 
 ここで登場するのが、<strong>DNS（Domain Name System）</strong>です
 
-### DNS による名前解決
+### [DNS による名前解決](#dns-name-resolution) {#dns-name-resolution}
 
 Kubernetes クラスタ内には DNS サーバーが動作しており、すべての Service に対して<strong>DNS レコード</strong>が自動的に作成されます
 
@@ -382,7 +385,7 @@ kube-proxy が実際の Pod に転送
 
 インターネットでドメイン名から IP アドレスを解決するのと同じ仕組みが、クラスタ内でも使われています
 
-### DNS の命名規則
+### [DNS の命名規則](#dns-naming-convention) {#dns-naming-convention}
 
 Service の DNS 名は、以下の規則で自動的に作成されます
 
@@ -396,7 +399,7 @@ Service の DNS 名は、以下の規則で自動的に作成されます
 database.default.svc.cluster.local
 ```
 
-### 短い名前でのアクセス
+### [短い名前でのアクセス](#short-name-access) {#short-name-access}
 
 Pod は通常、完全な DNS 名を指定する必要はありません
 
@@ -420,7 +423,7 @@ database.production
 
 Pod が `database` という名前を問い合わせると、DNS は自動的に `database.<Pod の Namespace>.svc.cluster.local` に展開して解決します
 
-### Headless Service
+### [Headless Service](#headless-service) {#headless-service}
 
 通常の Service は ClusterIP を持ち、DNS はその ClusterIP を返します
 
@@ -436,11 +439,11 @@ Headless Service に対する DNS 問い合わせは、ClusterIP の代わりに
 
 ---
 
-## CoreDNS（クラスタの DNS サーバー）
+## [CoreDNS（クラスタの DNS サーバー）](#coredns) {#coredns}
 
 Kubernetes クラスタ内で DNS の名前解決を担当するのが、<strong>CoreDNS</strong>です
 
-### CoreDNS とは
+### [CoreDNS とは](#what-is-coredns) {#what-is-coredns}
 
 <strong>CoreDNS</strong>は、<strong>プラグインベースの DNS サーバー</strong>です
 
@@ -448,7 +451,7 @@ CoreDNS 自体はシンプルな基盤であり、ほぼすべての機能がプ
 
 Kubernetes のサービスディスカバリに関しては、Kubernetes プラグインが担当しています
 
-### CoreDNS の動作
+### [CoreDNS の動作](#coredns-operation) {#coredns-operation}
 
 CoreDNS は、以下のように動作します
 
@@ -462,7 +465,7 @@ CoreDNS は API Server を監視し、Service と Pod の作成・削除・変�
 
 Pod から DNS 問い合わせを受け取ると、CoreDNS はプラグインチェーン（複数のプラグインを順番に通す処理）を通じてレコードを解決し、結果を返します
 
-### kubelet による DNS 設定
+### [kubelet による DNS 設定](#kubelet-dns-configuration) {#kubelet-dns-configuration}
 
 Pod 内の DNS 設定は、ノード上の kubelet が自動的に構成します
 
@@ -477,7 +480,7 @@ search default.svc.cluster.local svc.cluster.local cluster.local
 
 これにより、Pod は Service 名だけで DNS 問い合わせができるようになります
 
-### 前のシリーズとの接続
+### [前のシリーズとの接続](#previous-series-connection) {#previous-series-connection}
 
 前のシリーズでネットワークの仕組みを学んだ方は、DNS の名前解決プロセスを思い出すかもしれません
 
@@ -489,11 +492,11 @@ CoreDNS はクラスタのローカルな DNS サーバーとして、クラス�
 
 ---
 
-## Service の種類
+## [Service の種類](#service-types) {#service-types}
 
 Service には、アクセス方法の異なる複数の種類があります
 
-### ClusterIP（クラスタ内部アクセス）
+### [ClusterIP（クラスタ内部アクセス）](#cluster-ip-internal) {#cluster-ip-internal}
 
 <strong>ClusterIP</strong>は、Service のデフォルトの種類です
 
@@ -503,7 +506,7 @@ Service には、アクセス方法の異なる複数の種類があります
 
 クラスタ内の Pod 同士の通信に使われます
 
-### NodePort（ノード経由の外部アクセス）
+### [NodePort（ノード経由の外部アクセス）](#node-port) {#node-port}
 
 <strong>NodePort</strong>は、ClusterIP に加えて、<strong>すべてのノードの特定のポートで Service を公開する</strong>種類です
 
@@ -515,7 +518,7 @@ Service には、アクセス方法の異なる複数の種類があります
 
 NodePort は 30000〜32767 の範囲から割り当てられます
 
-### LoadBalancer（外部ロードバランサー経由のアクセス）
+### [LoadBalancer（外部ロードバランサー経由のアクセス）](#load-balancer) {#load-balancer}
 
 <strong>LoadBalancer</strong>は、NodePort に加えて、<strong>外部ロードバランサーを通じて Service を公開する</strong>種類です
 
@@ -525,13 +528,14 @@ NodePort は 30000〜32767 の範囲から割り当てられます
 クラスタ外部 ──→ 外部ロードバランサー ──→ ノード ──→ Service ──→ Pod
 ```
 
-### 種類の比較
+### [種類の比較](#service-types-comparison) {#service-types-comparison}
 
-| 種類         | アクセス元       | 仕組み                               |
+{: .labeled}
+| 種類 | アクセス元 | 仕組み |
 | ------------ | ---------------- | ------------------------------------ |
-| ClusterIP    | クラスタ内部のみ | 仮想 IP アドレスを割り当てる         |
-| NodePort     | クラスタ外部     | 全ノードの特定ポートで公開する       |
-| LoadBalancer | クラスタ外部     | 外部ロードバランサーを通じて公開する |
+| ClusterIP | クラスタ内部のみ | 仮想 IP アドレスを割り当てる |
+| NodePort | クラスタ外部 | 全ノードの特定ポートで公開する |
+| LoadBalancer | クラスタ外部 | 外部ロードバランサーを通じて公開する |
 
 これらの種類は階層的に構成されています
 
@@ -541,7 +545,7 @@ NodePort は内部的に ClusterIP を含み、LoadBalancer は内部的に Node
 
 ---
 
-## サービスディスカバリの全体像
+## [サービスディスカバリの全体像](#service-discovery-overview) {#service-discovery-overview}
 
 ここまで学んだ仕組みを、1 つの流れとしてまとめます
 
@@ -569,16 +573,17 @@ Pod A が `database` という名前の Service にアクセスするシナリ�
 7. Pod B がリクエストを処理して応答する
 ```
 
-### 各コンポーネントの役割
+### [各コンポーネントの役割](#component-roles) {#component-roles}
 
-| コンポーネント | 役割                                                           |
+{: .labeled}
+| コンポーネント | 役割 |
 | -------------- | -------------------------------------------------------------- |
-| DNS（CoreDNS） | Service 名を ClusterIP に変換する                              |
-| Service        | 安定した ClusterIP と、ラベルセレクタによる Pod 選択を提供する |
-| EndpointSlice  | Service に紐づく Pod の IP アドレスリストを維持する            |
-| kube-proxy     | ClusterIP 宛てのトラフィックを実際の Pod に転送する            |
+| DNS（CoreDNS） | Service 名を ClusterIP に変換する |
+| Service | 安定した ClusterIP と、ラベルセレクタによる Pod 選択を提供する |
+| EndpointSlice | Service に紐づく Pod の IP アドレスリストを維持する |
+| kube-proxy | ClusterIP 宛てのトラフィックを実際の Pod に転送する |
 
-### あるべき状態との関係
+### [あるべき状態との関係](#desired-state-relationship) {#desired-state-relationship}
 
 サービスディスカバリは、あるべき状態を支える重要な仕組みです
 
@@ -594,7 +599,7 @@ EndpointSlice が自動的に更新され、新しい Pod への転送が始ま�
 
 ---
 
-## 次のトピックへ
+## [次のトピックへ](#next-topic) {#next-topic}
 
 このトピックでは、以下のことを学びました
 
@@ -614,56 +619,57 @@ Pod やノードに障害が発生したとき、システムはどうやって�
 
 Pod が「正常に動いている」とは、何をもって判断するのでしょうか？
 
-次のトピック [05-self-healing](./05-self-healing.md) では、<strong>セルフヒーリング</strong>の仕組みを詳しく学びます
+次のトピック [05-self-healing](../05-self-healing/) では、<strong>セルフヒーリング</strong>の仕組みを詳しく学びます
 
 ---
 
-## 用語集
+## [用語集](#glossary) {#glossary}
 
-| 用語                                      | 説明                                                                                                                                               |
+{: .labeled}
+| 用語 | 説明 |
 | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| サービスディスカバリ（Service Discovery） | 分散システムにおいて、サービスの場所（IP アドレスやポート）を動的に発見する仕組み                                                                  |
-| Service                                   | Pod の集合に対する安定したアクセス先を提供する Kubernetes の抽象化。ラベルセレクタで対象の Pod を選択する                                          |
-| ClusterIP                                 | Service に割り当てられる仮想 IP アドレス。クラスタ内部からのみアクセスでき、Service が存在する限り変わらない                                       |
-| ラベルセレクタ（Label Selector）          | ラベルに基づいて Kubernetes オブジェクト（Pod など）を選択する仕組み。Service が対象の Pod を決定するために使用する                                |
-| EndpointSlice                             | Service のラベルセレクタに一致する Pod の IP アドレスとポート番号のリスト。Pod の作成・削除に応じて自動的に更新される                              |
-| kube-proxy                                | 各ノード上で動作し、Service の ClusterIP 宛てのトラフィックを実際の Pod に転送するコンポーネント                                                   |
-| DNS（Domain Name System）                 | 名前から IP アドレスを解決する仕組み。Kubernetes クラスタ内では CoreDNS がこの役割を担う                                                           |
-| CoreDNS                                   | Kubernetes クラスタ内で動作するプラグインベースの DNS サーバー。Service と Pod の DNS レコードを自動的に管理する                                   |
-| DNS レコード                              | DNS サーバーが保持する名前と IP アドレスの対応情報。Service が作成されると自動的に DNS レコードが作成される                                        |
-| サーチリスト（Search List）               | DNS 問い合わせ時に、短い名前を完全な DNS 名に展開するためのサフィックスのリスト。kubelet が Pod に自動設定する                                     |
-| Namespace                                 | Kubernetes のリソースを論理的にグループ化する仕組み。同じクラスタ内で複数の環境やチームを分離するために使用する                                    |
-| Headless Service                          | ClusterIP を持たない特殊な Service。DNS 問い合わせに対して個々の Pod の IP アドレスを返す                                                          |
-| NodePort                                  | すべてのノードの特定ポートで Service を公開する種類。クラスタ外部からノードの IP とポート番号でアクセスできる                                      |
-| LoadBalancer                              | 外部ロードバランサーを通じて Service を公開する種類。クラウド環境で外部ロードバランサーが自動的にプロビジョニングされる                            |
-| NAT（Network Address Translation）        | ネットワークアドレス変換。IP アドレスを別の IP アドレスに変換する仕組み。Kubernetes のネットワークモデルでは Pod 間通信に NAT を使わないことが要件 |
-| CNI（Container Network Interface）        | Kubernetes がネットワークプラグインと連携するための標準インターフェース。Pod への IP アドレス割り当てとネットワーク接続を担当する                  |
-| Readiness Probe                           | Pod がトラフィックを受け入れる準備ができているかを確認するヘルスチェック。失敗した Pod は EndpointSlice から一時的に除外される                     |
-| プラグインチェーン（Plugin Chain）        | CoreDNS がDNS 問い合わせを処理する際に、複数のプラグインを順番に通す仕組み                                                                         |
+| サービスディスカバリ（Service Discovery） | 分散システムにおいて、サービスの場所（IP アドレスやポート）を動的に発見する仕組み |
+| Service | Pod の集合に対する安定したアクセス先を提供する Kubernetes の抽象化。ラベルセレクタで対象の Pod を選択する |
+| ClusterIP | Service に割り当てられる仮想 IP アドレス。クラスタ内部からのみアクセスでき、Service が存在する限り変わらない |
+| ラベルセレクタ（Label Selector） | ラベルに基づいて Kubernetes オブジェクト（Pod など）を選択する仕組み。Service が対象の Pod を決定するために使用する |
+| EndpointSlice | Service のラベルセレクタに一致する Pod の IP アドレスとポート番号のリスト。Pod の作成・削除に応じて自動的に更新される |
+| kube-proxy | 各ノード上で動作し、Service の ClusterIP 宛てのトラフィックを実際の Pod に転送するコンポーネント |
+| DNS（Domain Name System） | 名前から IP アドレスを解決する仕組み。Kubernetes クラスタ内では CoreDNS がこの役割を担う |
+| CoreDNS | Kubernetes クラスタ内で動作するプラグインベースの DNS サーバー。Service と Pod の DNS レコードを自動的に管理する |
+| DNS レコード | DNS サーバーが保持する名前と IP アドレスの対応情報。Service が作成されると自動的に DNS レコードが作成される |
+| サーチリスト（Search List） | DNS 問い合わせ時に、短い名前を完全な DNS 名に展開するためのサフィックスのリスト。kubelet が Pod に自動設定する |
+| Namespace | Kubernetes のリソースを論理的にグループ化する仕組み。同じクラスタ内で複数の環境やチームを分離するために使用する |
+| Headless Service | ClusterIP を持たない特殊な Service。DNS 問い合わせに対して個々の Pod の IP アドレスを返す |
+| NodePort | すべてのノードの特定ポートで Service を公開する種類。クラスタ外部からノードの IP とポート番号でアクセスできる |
+| LoadBalancer | 外部ロードバランサーを通じて Service を公開する種類。クラウド環境で外部ロードバランサーが自動的にプロビジョニングされる |
+| NAT（Network Address Translation） | ネットワークアドレス変換。IP アドレスを別の IP アドレスに変換する仕組み。Kubernetes のネットワークモデルでは Pod 間通信に NAT を使わないことが要件 |
+| CNI（Container Network Interface） | Kubernetes がネットワークプラグインと連携するための標準インターフェース。Pod への IP アドレス割り当てとネットワーク接続を担当する |
+| Readiness Probe | Pod がトラフィックを受け入れる準備ができているかを確認するヘルスチェック。失敗した Pod は EndpointSlice から一時的に除外される |
+| プラグインチェーン（Plugin Chain） | CoreDNS がDNS 問い合わせを処理する際に、複数のプラグインを順番に通す仕組み |
 
 ---
 
-## 参考資料
+## [参考資料](#references) {#references}
 
 このページの内容は、以下のソースに基づいています
 
 <strong>Kubernetes サービスとネットワーキング</strong>
 
-- [Service](https://kubernetes.io/docs/concepts/services-networking/service/)
+- [Service](https://kubernetes.io/docs/concepts/services-networking/service/){:target="\_blank"}
   - Service の概念、ClusterIP、NodePort、LoadBalancer の公式ドキュメント
 
-- [DNS for Services and Pods](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)
+- [DNS for Services and Pods](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/){:target="\_blank"}
   - クラスタ内の DNS の命名規則と動作の公式ドキュメント
 
-- [Cluster Networking](https://kubernetes.io/docs/concepts/cluster-administration/networking/)
+- [Cluster Networking](https://kubernetes.io/docs/concepts/cluster-administration/networking/){:target="\_blank"}
   - Kubernetes のネットワークモデルの公式ドキュメント
 
 <strong>CoreDNS</strong>
 
-- [CoreDNS Manual](https://coredns.io/manual/toc/)
+- [CoreDNS Manual](https://coredns.io/manual/toc/){:target="\_blank"}
   - CoreDNS の公式マニュアル
 
 <strong>EndpointSlice</strong>
 
-- [EndpointSlices](https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/)
+- [EndpointSlices](https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/){:target="\_blank"}
   - EndpointSlice の仕組みの公式ドキュメント
