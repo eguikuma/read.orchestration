@@ -785,27 +785,27 @@ Pod が再作成されて IP アドレスが変わった場合、通信先をど
 | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | スケジューリング（Scheduling） | Pod をクラスタ内のどのノードで実行するかを決定するプロセス |
 | Scheduler（kube-scheduler） | まだノードに割り当てられていない Pod を見つけ、適切なノードを選んで割り当てるコンポーネント |
-| フィルタリング（Filtering） | Scheduler がノード選択時に、Pod を実行できないノードを候補から除外する段階。硬い制約を適用する |
-| スコアリング（Scoring） | Scheduler がフィルタリング後のノード候補にスコアを付け、最適なノードを選ぶ段階。柔らかい優先度を適用する |
-| 硬い制約（ハードコンストレイント） | 満たさなければ配置しないという条件。フィルタリングで適用される |
-| 柔らかい優先度（ソフトプリファレンス） | 可能であれば優先したいという条件。スコアリングで適用される |
-| リソース要求（Requests） | Pod が正常に動作するために最低限必要な CPU やメモリの量。Scheduler がスケジューリング時の判断基準として使用する |
-| リソース制限（Limits） | Pod が使用できる CPU やメモリの上限。kubelet が cgroup を通じて実行時に適用する |
-| ミリコア（Millicores） | CPU リソースの計測単位。1000m が 1 つの CPU コアに相当する |
+| フィルタリング（Filtering） | Scheduler がノード選択時に、Pod を実行できないノードを候補から除外する段階<br>硬い制約を適用する |
+| スコアリング（Scoring） | Scheduler がフィルタリング後のノード候補にスコアを付け、最適なノードを選ぶ段階<br>柔らかい優先度を適用する |
+| 硬い制約（ハードコンストレイント） | 満たさなければ配置しないという条件<br>フィルタリングで適用される |
+| 柔らかい優先度（ソフトプリファレンス） | 可能であれば優先したいという条件<br>スコアリングで適用される |
+| リソース要求（Requests） | Pod が正常に動作するために最低限必要な CPU やメモリの量<br>Scheduler がスケジューリング時の判断基準として使用する |
+| リソース制限（Limits） | Pod が使用できる CPU やメモリの上限<br>kubelet が cgroup を通じて実行時に適用する |
+| ミリコア（Millicores） | CPU リソースの計測単位<br>1000m が 1 つの CPU コアに相当する |
 | Allocatable（割り当て可能） | ノードの全リソースからシステム予約分を差し引いた、Pod に割り当て可能なリソース量 |
-| ラベル（Label） | Kubernetes オブジェクトに付与するキーとバリューの組み合わせ。ノード選択やグルーピングに使用する |
-| nodeSelector | Pod の仕様に記述する最もシンプルなノード選択制約。指定したラベルを持つノードにのみ配置される |
-| Node Affinity（ノードアフィニティ） | nodeSelector の拡張版。必須条件（required）と推奨条件（preferred）を柔軟に指定できるノード選択の仕組み |
-| requiredDuringSchedulingIgnoredDuringExecution | Node Affinity の必須条件。フィルタリングで適用される硬い制約。スケジューリング時に必須、実行中は無視 |
-| preferredDuringSchedulingIgnoredDuringExecution | Node Affinity の推奨条件。スコアリングで適用される柔らかい優先度。スケジューリング時に考慮、実行中は無視 |
-| Taint（テイント） | ノードに付与する忌避設定。Toleration を持たない Pod の配置を拒否する |
-| Toleration（トレレーション） | Pod に設定する Taint の許容宣言。Taint が付いたノードへの配置を可能にする |
-| NoSchedule | Taint の効果の 1 つ。Toleration を持たない新しい Pod の配置を拒否する。既存の Pod には影響しない |
-| PreferNoSchedule | Taint の効果の 1 つ。可能であれば配置を避けるが、他にノードがなければ許容する。既存の Pod には影響しない |
-| NoExecute | Taint の効果の 1 つ。Toleration を持たない Pod の配置を拒否し、既に動いている Pod も退去させる |
-| Scheduling Framework | Kubernetes の Scheduler のプラグインベースのアーキテクチャ。フィルタリングやスコアリングの各段階を拡張ポイントとして提供する |
-| Pending（保留） | Pod が作成されたがまだノードに配置されていない状態。フィルタリングを通過するノードがない場合に発生する |
-| cgroup（Control Group） | Linux カーネルの機能。プロセスが使用できるリソース（CPU、メモリなど）を制限する。Kubernetes では Limits の実行時の適用に使用される |
+| ラベル（Label） | Kubernetes オブジェクトに付与するキーとバリューの組み合わせ<br>ノード選択やグルーピングに使用する |
+| nodeSelector | Pod の仕様に記述する最もシンプルなノード選択制約<br>指定したラベルを持つノードにのみ配置される |
+| Node Affinity（ノードアフィニティ） | nodeSelector の拡張版<br>必須条件（required）と推奨条件（preferred）を柔軟に指定できるノード選択の仕組み |
+| requiredDuringSchedulingIgnoredDuringExecution | Node Affinity の必須条件<br>フィルタリングで適用される硬い制約<br>スケジューリング時に必須、実行中は無視 |
+| preferredDuringSchedulingIgnoredDuringExecution | Node Affinity の推奨条件<br>スコアリングで適用される柔らかい優先度<br>スケジューリング時に考慮、実行中は無視 |
+| Taint（テイント） | ノードに付与する忌避設定<br>Toleration を持たない Pod の配置を拒否する |
+| Toleration（トレレーション） | Pod に設定する Taint の許容宣言<br>Taint が付いたノードへの配置を可能にする |
+| NoSchedule | Taint の効果の 1 つ<br>Toleration を持たない新しい Pod の配置を拒否する<br>既存の Pod には影響しない |
+| PreferNoSchedule | Taint の効果の 1 つ<br>可能であれば配置を避けるが、他にノードがなければ許容する<br>既存の Pod には影響しない |
+| NoExecute | Taint の効果の 1 つ<br>Toleration を持たない Pod の配置を拒否し、既に動いている Pod も退去させる |
+| Scheduling Framework | Kubernetes の Scheduler のプラグインベースのアーキテクチャ<br>フィルタリングやスコアリングの各段階を拡張ポイントとして提供する |
+| Pending（保留） | Pod が作成されたがまだノードに配置されていない状態<br>フィルタリングを通過するノードがない場合に発生する |
+| cgroup（Control Group） | Linux カーネルの機能<br>プロセスが使用できるリソース（CPU、メモリなど）を制限する<br>Kubernetes では Limits の実行時の適用に使用される |
 | OOM Kill（Out of Memory Kill） | メモリの Limits を超過した場合に、カーネルがプロセスを強制終了する仕組み |
 
 ---

@@ -51,16 +51,16 @@ Docker Swarm、Apache Mesos、HashiCorp Nomad など、Kubernetes と並行し�
 {: .labeled}
 | 年 | 技術 / プロジェクト | 概要 |
 | ------- | ------------------- | ------------------------------------------------------------------------------------ |
-| 2003 頃 | Google Borg | Google 社内の大規模クラスタ管理システム。数万台のマシンでサービスを運用 |
-| 2009 | Apache Mesos | UC Berkeley で開発。二段階スケジューリングによるデータセンター規模のリソース共有基盤 |
-| 2013 | Docker | コンテナプラットフォーム。コンテナの普及により、オーケストレーションの必要性が高まる |
+| 2003 頃 | Google Borg | Google 社内の大規模クラスタ管理システム<br>数万台のマシンでサービスを運用 |
+| 2009 | Apache Mesos | UC Berkeley で開発<br>二段階スケジューリングによるデータセンター規模のリソース共有基盤 |
+| 2013 | Docker | コンテナプラットフォーム<br>コンテナの普及により、オーケストレーションの必要性が高まる |
 | 2014 | Kubernetes | Google が Borg の経験を活かしてオープンソースとして公開（初期リリース） |
 | 2014 | Docker Swarm | Docker 社によるスタンドアロン型のオーケストレーションツール（初期版） |
-| 2015 | CNCF 設立 | Cloud Native Computing Foundation の設立。Kubernetes 1.0 が CNCF に移管される |
+| 2015 | CNCF 設立 | Cloud Native Computing Foundation の設立<br>Kubernetes 1.0 が CNCF に移管される |
 | 2015 | Marathon on Mesos | Mesos 上でコンテナの長時間稼働サービスを管理するフレームワーク |
-| 2015 | HashiCorp Nomad | コンテナに限定しないワークロードスケジューラ。シンプルさを設計目標とする |
-| 2016 | Docker Swarm mode | Docker Engine に Swarm 機能を統合（SwarmKit）。docker service create で操作可能に |
-| 2017 | Docker の K8s 対応 | Docker Desktop が Kubernetes をサポート。Docker 社自身が Kubernetes を取り込む |
+| 2015 | HashiCorp Nomad | コンテナに限定しないワークロードスケジューラ<br>シンプルさを設計目標とする |
+| 2016 | Docker Swarm mode | Docker Engine に Swarm 機能を統合（SwarmKit）<br>docker service create で操作可能に |
+| 2017 | Docker の K8s 対応 | Docker Desktop が Kubernetes をサポート<br>Docker 社自身が Kubernetes を取り込む |
 | 2018 | Kubernetes の標準化 | AWS（EKS）、GCP（GKE）、Azure（AKS）が Kubernetes のマネージドサービスを提供 |
 
 ---
@@ -430,16 +430,16 @@ Docker（2013）
 {: .labeled}
 | 用語 | 説明 |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| Borg | Google が社内で運用していた大規模クラスタ管理システム。Kubernetes の設計に影響を与えた |
-| Omega | Google 社内の研究プロジェクト。共有状態スケジューリングによって Borg のスケジューラのボトルネックを解消する実験的システム |
-| Apache Mesos | UC Berkeley で開発されたクラスタ管理システム。二段階スケジューリングにより、データセンター全体のリソースを複数のフレームワーク間で共有する |
-| Marathon | Mesos 上でコンテナの長時間稼働サービスを管理するフレームワーク。デプロイ、スケーリング、セルフヒーリングの機能を提供していた |
-| Docker Swarm | Docker 社が開発したコンテナオーケストレーションツール。Docker CLI の延長として操作できるシンプルさが特徴 |
-| SwarmKit | Docker Engine 1.12 で統合された Swarm mode の基盤。スタンドアロン Swarm から統合型に移行した際の内部実装 |
-| Nomad | HashiCorp 社が開発したワークロードスケジューラ。コンテナだけでなく VM やバッチジョブなど多様なワークロードに対応する |
-| 二段階スケジューリング（Two-level Scheduling） | Mesos が採用したスケジューリングモデル。第一段階で Mesos がリソースを提示し、第二段階でフレームワークが選択する |
-| 共有状態スケジューリング（Shared-state Scheduling） | Omega が採用したモデル。複数のスケジューラがクラスタ状態のコピーを共有し、独立してスケジューリング判断を行う |
-| CRD（Custom Resource Definition） | Kubernetes の API に独自のリソースタイプを追加する仕組み。Kubernetes の拡張性を支える重要な機能 |
+| Borg | Google が社内で運用していた大規模クラスタ管理システム<br>Kubernetes の設計に影響を与えた |
+| Omega | Google 社内の研究プロジェクト<br>共有状態スケジューリングによって Borg のスケジューラのボトルネックを解消する実験的システム |
+| Apache Mesos | UC Berkeley で開発されたクラスタ管理システム<br>二段階スケジューリングにより、データセンター全体のリソースを複数のフレームワーク間で共有する |
+| Marathon | Mesos 上でコンテナの長時間稼働サービスを管理するフレームワーク<br>デプロイ、スケーリング、セルフヒーリングの機能を提供していた |
+| Docker Swarm | Docker 社が開発したコンテナオーケストレーションツール<br>Docker CLI の延長として操作できるシンプルさが特徴 |
+| SwarmKit | Docker Engine 1.12 で統合された Swarm mode の基盤<br>スタンドアロン Swarm から統合型に移行した際の内部実装 |
+| Nomad | HashiCorp 社が開発したワークロードスケジューラ<br>コンテナだけでなく VM やバッチジョブなど多様なワークロードに対応する |
+| 二段階スケジューリング（Two-level Scheduling） | Mesos が採用したスケジューリングモデル<br>第一段階で Mesos がリソースを提示し、第二段階でフレームワークが選択する |
+| 共有状態スケジューリング（Shared-state Scheduling） | Omega が採用したモデル<br>複数のスケジューラがクラスタ状態のコピーを共有し、独立してスケジューリング判断を行う |
+| CRD（Custom Resource Definition） | Kubernetes の API に独自のリソースタイプを追加する仕組み<br>Kubernetes の拡張性を支える重要な機能 |
 
 ---
 

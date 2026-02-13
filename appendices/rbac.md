@@ -406,7 +406,7 @@ RBAC を設計する際には、この原則に従うことが重要です
 {: .labeled}
 | 実践 | 説明 |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| 必要な動詞のみを許可する | 読み取りだけで十分なら `get` と `list` のみ。`delete` や `update` は不要なら付与しない |
+| 必要な動詞のみを許可する | 読み取りだけで十分なら `get` と `list` のみ<br>`delete` や `update` は不要なら付与しない |
 | 必要なリソースのみを対象にする | すべてのリソースではなく、実際にアクセスが必要なリソースだけを指定する |
 | Namespace スコープを優先する | ClusterRole と ClusterRoleBinding よりも、Role と RoleBinding を使い、影響範囲を Namespace 内に限定する |
 | 専用の ServiceAccount を使う | `default` ServiceAccount を使い回さず、アプリケーションごとに専用の ServiceAccount を作成する |
@@ -426,17 +426,17 @@ RBAC を設計する際には、この原則に従うことが重要です
 {: .labeled}
 | 用語 | 説明 |
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| RBAC（Role-Based Access Control） | 役割（ロール）に権限を割り当て、その役割をユーザーに割り当てるアクセス制御モデル。Kubernetes の標準的な認可の仕組み |
+| RBAC（Role-Based Access Control） | 役割（ロール）に権限を割り当て、その役割をユーザーに割り当てるアクセス制御モデル<br>Kubernetes の標準的な認可の仕組み |
 | 認証（Authentication） | リクエストの送信元が「誰であるか」を確認するプロセス |
 | 認可（Authorization） | 認証されたユーザーが「要求した操作を実行する権限があるか」を確認するプロセス |
 | Role | 特定の Namespace 内で有効な権限のセットを定義するリソース |
-| ClusterRole | クラスタ全体で有効な権限のセットを定義するリソース。Namespace を持たない |
+| ClusterRole | クラスタ全体で有効な権限のセットを定義するリソース<br>Namespace を持たない |
 | RoleBinding | Role または ClusterRole の権限を、特定の Namespace 内でユーザーに割り当てるリソース |
 | ClusterRoleBinding | ClusterRole の権限を、クラスタ全体でユーザーに割り当てるリソース |
-| ServiceAccount | Pod が API Server に認証されるためのアイデンティティ。ユーザーアカウントとは異なり、Pod 内のプロセスを表す |
-| 動詞（Verb） | RBAC の権限定義で使用される操作の種類。get、list、watch、create、update、patch、delete など |
-| apiGroups | Kubernetes のリソースが属する API グループ。Role の権限定義で対象リソースの API グループを指定する |
-| subjects | RoleBinding や ClusterRoleBinding で権限を割り当てる対象。User、Group、ServiceAccount の 3 種類がある |
+| ServiceAccount | Pod が API Server に認証されるためのアイデンティティ<br>ユーザーアカウントとは異なり、Pod 内のプロセスを表す |
+| 動詞（Verb） | RBAC の権限定義で使用される操作の種類<br>get、list、watch、create、update、patch、delete など |
+| apiGroups | Kubernetes のリソースが属する API グループ<br>Role の権限定義で対象リソースの API グループを指定する |
+| subjects | RoleBinding や ClusterRoleBinding で権限を割り当てる対象<br>User、Group、ServiceAccount の 3 種類がある |
 | 最小権限の原則（Principle of Least Privilege） | ユーザーやプロセスに、役割を果たすために必要な最小限の権限のみを付与するセキュリティ原則 |
 
 ---

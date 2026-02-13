@@ -616,18 +616,18 @@ Kubernetes に対して「何を、どのような状態にしたいか」を宣
 | スケーリング（Scaling） | システムの処理能力を負荷に応じて増減させること |
 | 水平スケーリング（Horizontal Scaling） | Pod の数を増減させることで処理能力を調整する方法 |
 | 垂直スケーリング（Vertical Scaling） | Pod に割り当てるリソース（CPU やメモリ）を変更することで処理能力を調整する方法 |
-| スケールアウト（Scale Out） | Pod の数を増やすこと。水平スケーリングの拡張方向 |
-| スケールイン（Scale In） | Pod の数を減らすこと。水平スケーリングの縮小方向 |
+| スケールアウト（Scale Out） | Pod の数を増やすこと<br>水平スケーリングの拡張方向 |
+| スケールイン（Scale In） | Pod の数を減らすこと<br>水平スケーリングの縮小方向 |
 | HPA（Horizontal Pod Autoscaler） | メトリクスに基づいて Pod のレプリカ数を自動で調整するコントローラ |
-| メトリクス（Metrics） | システムの状態を数値化した測定値。CPU 使用率、メモリ使用量、リクエスト数など |
+| メトリクス（Metrics） | システムの状態を数値化した測定値<br>CPU 使用率、メモリ使用量、リクエスト数など |
 | Metrics API | Pod やノードのリソース使用量を提供する Kubernetes の API |
-| metrics-server | Metrics API の実装。各ノードの kubelet からリソース使用量を収集する |
+| metrics-server | Metrics API の実装<br>各ノードの kubelet からリソース使用量を収集する |
 | リソースメトリクス（Resource Metrics） | Pod の CPU やメモリの使用率を表すメトリクス |
-| カスタムメトリクス（Custom Metrics） | アプリケーション固有のメトリクス。リクエスト数やキューの長さなど |
-| 許容範囲（Tolerance） | メトリクス比率がこの範囲内であればスケーリングを行わない閾値。デフォルトは 0.1（10%） |
-| 安定化ウィンドウ（Stabilization Window） | スケーリング決定時に過去の推奨値を参照する期間。フラッピングを防ぐための仕組み |
+| カスタムメトリクス（Custom Metrics） | アプリケーション固有のメトリクス<br>リクエスト数やキューの長さなど |
+| 許容範囲（Tolerance） | メトリクス比率がこの範囲内であればスケーリングを行わない閾値<br>デフォルトは 0.1（10%） |
+| 安定化ウィンドウ（Stabilization Window） | スケーリング決定時に過去の推奨値を参照する期間<br>フラッピングを防ぐための仕組み |
 | フラッピング（Flapping） | Pod の数が短期間で増減を繰り返す不安定な状態 |
-| VPA（Vertical Pod Autoscaler） | Pod のリソース要求を自動で調整する仕組み。Kubernetes のコア機能ではなく、追加コンポーネントとして導入する |
+| VPA（Vertical Pod Autoscaler） | Pod のリソース要求を自動で調整する仕組み<br>Kubernetes のコア機能ではなく、追加コンポーネントとして導入する |
 | レプリカ数（Replica Count） | 同じ構成の Pod を何個動かすかを指定する数 |
 
 ---
