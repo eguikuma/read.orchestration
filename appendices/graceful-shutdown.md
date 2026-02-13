@@ -1,16 +1,17 @@
-<div align="right">
-<img src="https://img.shields.io/badge/AI-ASSISTED_STUDY-3b82f6?style=for-the-badge&labelColor=1e293b&logo=bookstack&logoColor=white" alt="AI Assisted Study" />
-</div>
+---
+layout: default
+title: Pod の安全な終了
+---
 
-# appendix：Pod の安全な終了
+# [appendix：Pod の安全な終了](#graceful-shutdown) {#graceful-shutdown}
 
-## はじめに
+## [はじめに](#introduction) {#introduction}
 
-[05-self-healing](../05-self-healing.md) では、障害を自動で検知し、あるべき状態に向けて復旧するセルフヒーリングの仕組みを学びました
+[05-self-healing](../../05-self-healing/) では、障害を自動で検知し、あるべき状態に向けて復旧するセルフヒーリングの仕組みを学びました
 
 kubelet がコンテナの異常を検知して再起動し、ReplicaSet コントローラが Pod の不足を補い、Node コントローラがノード障害時に Pod を退避させる、3 層の自動復旧メカニズムを確認しました
 
-[07-declarative-management](../07-declarative-management.md) では、ローリングアップデートの仕組みを学びました
+[07-declarative-management](../../07-declarative-management/) では、ローリングアップデートの仕組みを学びました
 
 古い Pod を 1 つずつ新しい Pod に置き換え、ダウンタイムなしでアプリケーションを更新できることを確認しました
 
@@ -28,7 +29,7 @@ Pod の削除から実際の終了までのシーケンスと、処理中のリ�
 
 ---
 
-## このページで学ぶこと
+## [このページで学ぶこと](#what-you-will-learn) {#what-you-will-learn}
 
 - <strong>Pod 削除時のシーケンス</strong>
   - API Server から kubelet を経てコンテナが終了するまでの全体の流れ
@@ -45,22 +46,22 @@ Pod の削除から実際の終了までのシーケンスと、処理中のリ�
 
 ---
 
-## 目次
+## [目次](#table-of-contents) {#table-of-contents}
 
-1. [Pod 削除時のシーケンス](#pod-削除時のシーケンス)
+1. [Pod 削除時のシーケンス](#pod-deletion-sequence)
 2. [Termination Grace Period](#termination-grace-period)
-3. [EndpointSlice からの除外タイミング](#endpointslice-からの除外タイミング)
-4. [preStop フック](#prestop-フック)
-5. [アプリケーション側の対応](#アプリケーション側の対応)
-6. [ローリングアップデートとの関係](#ローリングアップデートとの関係)
-7. [用語集](#用語集)
-8. [参考資料](#参考資料)
+3. [EndpointSlice からの除外タイミング](#endpoint-slice-removal-timing)
+4. [preStop フック](#prestop-hook)
+5. [アプリケーション側の対応](#application-side-handling)
+6. [ローリングアップデートとの関係](#rolling-update-relationship)
+7. [用語集](#glossary)
+8. [参考資料](#references)
 
 ---
 
-## Pod 削除時のシーケンス
+## [Pod 削除時のシーケンス](#pod-deletion-sequence) {#pod-deletion-sequence}
 
-### 削除の全体像
+### [削除の全体像](#deletion-overview) {#deletion-overview}
 
 Pod が削除されるとき、Kubernetes の複数のコンポーネントが連携して終了処理を行います
 
@@ -68,7 +69,7 @@ Pod が削除されるとき、Kubernetes の複数のコンポーネントが�
 
 管理者が手動で Pod を削除する場合、ローリングアップデートで古い Pod が置き換えられる場合、スケールダウンでレプリカ数が減る場合など、いずれの場合も同じ終了シーケンスが実行されます
 
-### シーケンスの流れ
+### [シーケンスの流れ](#sequence-flow) {#sequence-flow}
 
 Pod の削除は、以下の流れで進みます
 
@@ -127,9 +128,9 @@ API Server が Pod を「Terminating」に更新
 
 ---
 
-## Termination Grace Period
+## [Termination Grace Period](#termination-grace-period) {#termination-grace-period}
 
-### SIGTERM と SIGKILL
+### [SIGTERM と SIGKILL](#sigterm-and-sigkill) {#sigterm-and-sigkill}
 
 前のシリーズでユーザー空間を学んだ方は、シグナルの仕組みを思い出すかもしれません
 
@@ -145,7 +146,7 @@ API Server が Pod を「Terminating」に更新
 
 即座にプロセスが停止します
 
-### 猶予期間の仕組み
+### [猶予期間の仕組み](#grace-period-mechanism) {#grace-period-mechanism}
 
 kubelet がコンテナに SIGTERM を送信してから SIGKILL を送信するまでの時間を、<strong>Termination Grace Period（終了猶予期間）</strong>と呼びます
 
@@ -163,7 +164,7 @@ spec:
 
 上記の設定では、SIGTERM の送信後 60 秒以内にコンテナが終了しなければ、SIGKILL で強制終了されます
 
-### 猶予期間のタイムライン
+### [猶予期間のタイムライン](#grace-period-timeline) {#grace-period-timeline}
 
 猶予期間は、preStop フックの実行時間も含みます
 
@@ -180,9 +181,9 @@ preStop フックの実行時間が長すぎると、アプリケーションの
 
 ---
 
-## EndpointSlice からの除外タイミング
+## [EndpointSlice からの除外タイミング](#endpoint-slice-removal-timing) {#endpoint-slice-removal-timing}
 
-### レース条件の発生
+### [レース条件の発生](#race-condition-occurrence) {#race-condition-occurrence}
 
 前述の通り、Pod が「Terminating」に更新されると、kubelet への通知と EndpointSlice コントローラへの通知が<strong>並行して</strong>発行されます
 
@@ -192,7 +193,7 @@ EndpointSlice から Pod が除外されても、その変更が kube-proxy に�
 
 この間に、<strong>既に終了処理を開始した Pod にトラフィックが送られてしまう</strong>可能性があります
 
-### レース条件の流れ
+### [レース条件の流れ](#race-condition-flow) {#race-condition-flow}
 
 以下のタイムラインで、レース条件の発生を見てみましょう
 
@@ -218,9 +219,9 @@ kubelet が SIGTERM を送信するタイミング（時刻 0.1s）と、kube-pr
 
 このずれの間に、終了処理を開始したアプリケーションに新しいリクエストが到着する可能性があります
 
-### なぜこのレース条件が起きるか
+### [なぜこのレース条件が起きるか](#why-race-condition) {#why-race-condition}
 
-[05-self-healing](../05-self-healing.md) で学んだように、Readiness Probe が失敗すると Pod は EndpointSlice から除外されます
+[05-self-healing](../../05-self-healing/) で学んだように、Readiness Probe が失敗すると Pod は EndpointSlice から除外されます
 
 しかし、Pod の削除時には Readiness Probe の結果を待つのではなく、EndpointSlice コントローラが直接 Pod を除外します
 
@@ -230,9 +231,9 @@ kubelet が SIGTERM を送信するタイミング（時刻 0.1s）と、kube-pr
 
 ---
 
-## preStop フック
+## [preStop フック](#prestop-hook) {#prestop-hook}
 
-### preStop フックとは
+### [preStop フックとは](#what-is-prestop-hook) {#what-is-prestop-hook}
 
 <strong>preStop フック</strong>は、コンテナの終了前に実行される<strong>ライフサイクルフック</strong>です
 
@@ -253,7 +254,7 @@ preStop フックが完了
 コンテナに SIGTERM を送信
 ```
 
-### レース条件の緩和
+### [レース条件の緩和](#race-condition-mitigation) {#race-condition-mitigation}
 
 preStop フックに短い待機時間（sleep）を入れることで、EndpointSlice の更新が kube-proxy に反映される時間を確保できます
 
@@ -274,7 +275,7 @@ spec:
 
 ルールが更新された後は、新しいトラフィックがこの Pod に送られなくなります
 
-### preStop フック付きのタイムライン
+### [preStop フック付きのタイムライン](#prestop-hook-timeline) {#prestop-hook-timeline}
 
 ```
 時刻 0s  ：API Server が Pod を「Terminating」に更新
@@ -297,7 +298,7 @@ preStop の sleep によって、SIGTERM の送信が遅延され、その間に
 
 SIGTERM を受け取った時点では、新しいトラフィックは送られてこないため、アプリケーションは処理中のリクエストだけを完了させれば安全に終了できます
 
-### preStop フックの注意点
+### [preStop フックの注意点](#prestop-hook-caution) {#prestop-hook-caution}
 
 preStop フックの実行時間は、terminationGracePeriodSeconds に含まれます
 
@@ -307,9 +308,9 @@ preStop で 5 秒間 sleep し、terminationGracePeriodSeconds がデフォル�
 
 ---
 
-## アプリケーション側の対応
+## [アプリケーション側の対応](#application-side-handling) {#application-side-handling}
 
-### SIGTERM ハンドリング
+### [SIGTERM ハンドリング](#sigterm-handling) {#sigterm-handling}
 
 Pod の安全な終了は、Kubernetes 側の仕組みだけでは実現できません
 
@@ -341,7 +342,7 @@ SIGTERM を受け取ったら、新しいリクエストの受付を停止しま
 
 すべてのクリーンアップが完了したら、プロセスを正常終了します
 
-### SIGTERM を無視した場合
+### [SIGTERM を無視した場合](#sigterm-ignored) {#sigterm-ignored}
 
 アプリケーションが SIGTERM をハンドリングせず、無視した場合はどうなるでしょうか
 
@@ -351,7 +352,7 @@ SIGKILL ではアプリケーションに終了処理の機会が与えられな
 
 これは、クライアントから見るとリクエストが突然失敗する状態です
 
-### コネクションドレインの流れ
+### [コネクションドレインの流れ](#connection-drain-flow) {#connection-drain-flow}
 
 SIGTERM を適切にハンドリングするアプリケーションの動作を、タイムラインで見てみましょう
 
@@ -379,11 +380,11 @@ SIGTERM を受信
 
 ---
 
-## ローリングアップデートとの関係
+## [ローリングアップデートとの関係](#rolling-update-relationship) {#rolling-update-relationship}
 
-### 各 Pod の削除に適用される終了シーケンス
+### [各 Pod の削除に適用される終了シーケンス](#pod-deletion-termination-sequence) {#pod-deletion-termination-sequence}
 
-[07-declarative-management](../07-declarative-management.md) で学んだローリングアップデートでは、古い Pod が 1 つずつ新しい Pod に置き換えられます
+[07-declarative-management](../../07-declarative-management/) で学んだローリングアップデートでは、古い Pod が 1 つずつ新しい Pod に置き換えられます
 
 この「古い Pod の削除」のたびに、ここまで学んだ終了シーケンスが実行されます
 
@@ -402,9 +403,9 @@ SIGTERM を受信
 
 古い Pod が安全に終了してから次の置き換えに進むため、ローリングアップデート中にリクエストが失われることを防げます
 
-### maxUnavailable と Graceful Shutdown の関係
+### [maxUnavailable と Graceful Shutdown の関係](#max-unavailable-and-graceful-shutdown-relationship) {#max-unavailable-and-graceful-shutdown-relationship}
 
-[07-declarative-management](../07-declarative-management.md) で学んだ maxUnavailable は、更新中に利用不可になってよい Pod の数です
+[07-declarative-management](../../07-declarative-management/) で学んだ maxUnavailable は、更新中に利用不可になってよい Pod の数です
 
 maxUnavailable が 1 の場合、一度に 1 つの Pod だけが終了処理に入ります
 
@@ -414,7 +415,7 @@ maxUnavailable の値が大きいほど、同時に終了処理に入る Pod の
 
 Graceful Shutdown の設定（terminationGracePeriodSeconds、preStop フック）と合わせて、処理中のリクエストを確実に完了させるための時間を確保することが重要です
 
-### 安全なローリングアップデートの全体像
+### [安全なローリングアップデートの全体像](#safe-rolling-update-overview) {#safe-rolling-update-overview}
 
 ここまで学んだ仕組みを組み合わせると、ローリングアップデート時のリクエストの流れは以下のようになります
 
@@ -438,43 +439,44 @@ kube-proxy のルールが更新されると、終了処理中の Pod に新し�
 
 ---
 
-## 用語集
+## [用語集](#glossary) {#glossary}
 
-| 用語                                            | 説明                                                                                                                 |
+{: .labeled}
+| 用語 | 説明 |
 | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Graceful Shutdown（グレースフルシャットダウン） | 処理中のリクエストを完了させ、リソースをクリーンアップしてから終了する安全な終了方法                                 |
-| SIGTERM                                         | プロセスに終了を依頼するシグナル。プロセスはこのシグナルを受け取って終了処理を行う機会が与えられる                   |
-| SIGKILL                                         | プロセスを強制的に終了するシグナル。プロセスはこのシグナルをハンドリングできず、即座に停止する                       |
-| Termination Grace Period（終了猶予期間）        | kubelet が SIGTERM を送信してから SIGKILL を送信するまでの猶予時間。terminationGracePeriodSeconds で設定する         |
-| terminationGracePeriodSeconds                   | Pod のマニフェストで設定する終了猶予期間の秒数。デフォルトは 30 秒                                                   |
-| preStop フック                                  | コンテナの終了前に実行されるライフサイクルフック。SIGTERM の送信前に実行される                                       |
-| ライフサイクルフック（Lifecycle Hook）          | コンテナのライフサイクルの特定のタイミングで実行される処理。preStop はその一種                                       |
-| コネクションドレイン（Connection Draining）     | 新しいリクエストの受付を停止し、処理中のリクエストを完了させてから終了する手法                                       |
-| レース条件（Race Condition）                    | 複数の処理のタイミングによって異なる結果が生じる状態。Pod 削除時の SIGTERM 送信と EndpointSlice 更新の間で発生しうる |
-| Terminating                                     | Pod が削除処理中であることを示す状態。API Server が Pod を Terminating に更新すると、終了シーケンスが開始される      |
+| Graceful Shutdown（グレースフルシャットダウン） | 処理中のリクエストを完了させ、リソースをクリーンアップしてから終了する安全な終了方法 |
+| SIGTERM | プロセスに終了を依頼するシグナル。プロセスはこのシグナルを受け取って終了処理を行う機会が与えられる |
+| SIGKILL | プロセスを強制的に終了するシグナル。プロセスはこのシグナルをハンドリングできず、即座に停止する |
+| Termination Grace Period（終了猶予期間） | kubelet が SIGTERM を送信してから SIGKILL を送信するまでの猶予時間。terminationGracePeriodSeconds で設定する |
+| terminationGracePeriodSeconds | Pod のマニフェストで設定する終了猶予期間の秒数。デフォルトは 30 秒 |
+| preStop フック | コンテナの終了前に実行されるライフサイクルフック。SIGTERM の送信前に実行される |
+| ライフサイクルフック（Lifecycle Hook） | コンテナのライフサイクルの特定のタイミングで実行される処理。preStop はその一種 |
+| コネクションドレイン（Connection Draining） | 新しいリクエストの受付を停止し、処理中のリクエストを完了させてから終了する手法 |
+| レース条件（Race Condition） | 複数の処理のタイミングによって異なる結果が生じる状態。Pod 削除時の SIGTERM 送信と EndpointSlice 更新の間で発生しうる |
+| Terminating | Pod が削除処理中であることを示す状態。API Server が Pod を Terminating に更新すると、終了シーケンスが開始される |
 
 ---
 
-## 参考資料
+## [参考資料](#references) {#references}
 
 このページの内容は、以下のソースに基づいています
 
 <strong>Pod のライフサイクル</strong>
 
-- [Pod Lifecycle](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/)
+- [Pod Lifecycle](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/){:target="\_blank"}
   - Pod のフェーズ、終了シーケンス、terminationGracePeriodSeconds の公式ドキュメント
 
 <strong>Pod の終了</strong>
 
-- [Termination of Pods](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination)
+- [Termination of Pods](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination){:target="\_blank"}
   - Pod の終了シーケンス（SIGTERM、SIGKILL、猶予期間）の公式ドキュメント
 
 <strong>コンテナのライフサイクルフック</strong>
 
-- [Container Lifecycle Hooks](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/)
+- [Container Lifecycle Hooks](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/){:target="\_blank"}
   - preStop フックの仕組みと設定方法の公式ドキュメント
 
 <strong>EndpointSlice</strong>
 
-- [EndpointSlices](https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/)
+- [EndpointSlices](https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/){:target="\_blank"}
   - EndpointSlice の仕組みと更新タイミングの公式ドキュメント

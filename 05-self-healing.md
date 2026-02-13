@@ -1,12 +1,13 @@
-<div align="right">
-<img src="https://img.shields.io/badge/AI-ASSISTED_STUDY-3b82f6?style=for-the-badge&labelColor=1e293b&logo=bookstack&logoColor=white" alt="AI Assisted Study" />
-</div>
+---
+layout: default
+title: セルフヒーリング
+---
 
-# 05-self-healing：セルフヒーリング
+# [05-self-healing：セルフヒーリング](#self-healing) {#self-healing}
 
-## はじめに
+## [はじめに](#introduction) {#introduction}
 
-前のトピック [04-service-discovery](./04-service-discovery.md) では、Pod 同士がどのように互いを発見し、安定した通信を実現するかを学びました
+前のトピック [04-service-discovery](../04-service-discovery/) では、Pod 同士がどのように互いを発見し、安定した通信を実現するかを学びました
 
 Service が安定した ClusterIP を提供し、EndpointSlice が Pod の IP アドレスを自動追跡し、kube-proxy がトラフィックを実際の Pod に転送する仕組みを確認しました
 
@@ -26,7 +27,7 @@ Pod が「正常に動いている」とは、何をもって判断するので�
 
 ---
 
-## 日常の例え
+## [日常の例え](#everyday-analogy) {#everyday-analogy}
 
 セルフヒーリングの考え方を、日常の例えで見てみましょう
 
@@ -66,7 +67,7 @@ Kubernetes のセルフヒーリングも同じ仕組みです
 
 ---
 
-## このページで学ぶこと
+## [このページで学ぶこと](#what-you-will-learn) {#what-you-will-learn}
 
 このページでは、以下の概念を学びます
 
@@ -102,27 +103,27 @@ Kubernetes のセルフヒーリングも同じ仕組みです
 
 ---
 
-## 目次
+## [目次](#table-of-contents) {#table-of-contents}
 
-1. [あるべき状態の維持（復習と深掘り）](#あるべき状態の維持復習と深掘り)
-2. [Pod レベルのセルフヒーリング](#pod-レベルのセルフヒーリング)
-3. [ヘルスチェック（Probe）](#ヘルスチェックprobe)
-4. [Probe の実行方法](#probe-の実行方法)
-5. [ノード障害とリカバリ](#ノード障害とリカバリ)
-6. [セルフヒーリングの全体像](#セルフヒーリングの全体像)
-7. [次のトピックへ](#次のトピックへ)
-8. [用語集](#用語集)
-9. [参考資料](#参考資料)
+1. [あるべき状態の維持（復習と深掘り）](#desired-state-maintenance)
+2. [Pod レベルのセルフヒーリング](#pod-level-self-healing)
+3. [ヘルスチェック（Probe）](#health-check)
+4. [Probe の実行方法](#probe-execution-methods)
+5. [ノード障害とリカバリ](#node-failure-and-recovery)
+6. [セルフヒーリングの全体像](#self-healing-overview)
+7. [次のトピックへ](#next-topic)
+8. [用語集](#glossary)
+9. [参考資料](#references)
 
 ---
 
-## あるべき状態の維持（復習と深掘り）
+## [あるべき状態の維持（復習と深掘り）](#desired-state-maintenance) {#desired-state-maintenance}
 
-[02-architecture](./02-architecture.md) で、「あるべき状態（Desired State）」と「Reconciliation Loop（調整ループ）」の概念を導入しました
+[02-architecture](../02-architecture/) で、「あるべき状態（Desired State）」と「Reconciliation Loop（調整ループ）」の概念を導入しました
 
 ここでは、セルフヒーリングの文脈でこの仕組みを深掘りします
 
-### Reconciliation Loop の復習
+### [Reconciliation Loop の復習](#reconciliation-loop-review) {#reconciliation-loop-review}
 
 Reconciliation Loop は、以下の 3 ステップを<strong>継続的に繰り返す</strong>サイクルです
 
@@ -136,7 +137,7 @@ Reconciliation Loop は、以下の 3 ステップを<strong>継続的に繰り�
 
 変更があっても、障害が起きても、調整ループが継続的に動くことで、システムは常にあるべき状態に向かって収束します
 
-### セルフヒーリングとは
+### [セルフヒーリングとは](#what-is-self-healing) {#what-is-self-healing}
 
 <strong>セルフヒーリング</strong>とは、<strong>障害を検知し、あるべき状態に戻すための調整を自動で行う仕組み</strong>です
 
@@ -148,7 +149,7 @@ Reconciliation Loop は、以下の 3 ステップを<strong>継続的に繰り�
 
 管理者が手動で介入する必要はありません
 
-### コントローラの役割
+### [コントローラの役割](#controller-role) {#controller-role}
 
 セルフヒーリングを実行するのは、コントロールプレーンの<strong>コントローラ</strong>です
 
@@ -156,13 +157,14 @@ Reconciliation Loop は、以下の 3 ステップを<strong>継続的に繰り�
 
 セルフヒーリングに関わる主要なコントローラは以下です
 
-| コントローラ            | 担当             | セルフヒーリングの役割                                    |
+{: .labeled}
+| コントローラ | 担当 | セルフヒーリングの役割 |
 | ----------------------- | ---------------- | --------------------------------------------------------- |
 | ReplicaSet コントローラ | Pod のレプリカ数 | Pod の数が不足すれば新しい Pod を作成し、過剰なら削除する |
-| Node コントローラ       | ノードの状態     | ノードの応答を監視し、応答がないノードを検知する          |
-| Deployment コントローラ | Deployment       | ReplicaSet を管理し、ローリングアップデートを制御する     |
+| Node コントローラ | ノードの状態 | ノードの応答を監視し、応答がないノードを検知する |
+| Deployment コントローラ | Deployment | ReplicaSet を管理し、ローリングアップデートを制御する |
 
-### ReplicaSet コントローラの動作
+### [ReplicaSet コントローラの動作](#replica-set-controller-operation) {#replica-set-controller-operation}
 
 ReplicaSet コントローラの動作を、障害発生時の流れで見てみましょう
 
@@ -194,13 +196,13 @@ Service の EndpointSlice も自動更新され、新しい Pod へのトラフ�
 
 ---
 
-## Pod レベルのセルフヒーリング
+## [Pod レベルのセルフヒーリング](#pod-level-self-healing) {#pod-level-self-healing}
 
 セルフヒーリングには複数のレベルがあります
 
 まず、最も基本的な<strong>Pod レベルのセルフヒーリング</strong>を見てみましょう
 
-### コンテナの異常終了と再起動
+### [コンテナの異常終了と再起動](#container-failure-and-restart) {#container-failure-and-restart}
 
 Pod の中で動いているコンテナが異常終了した場合、ノード上の<strong>kubelet</strong>がこれを検知し、コンテナを自動的に再起動します
 
@@ -216,21 +218,22 @@ Pod レベルのセルフヒーリング（kubelet）
   Pod 自体が消失 → コントローラが検知 → 新しい Pod を作成
 ```
 
-### 再起動ポリシー（restartPolicy）
+### [再起動ポリシー（restartPolicy）](#restart-policy) {#restart-policy}
 
 Pod には<strong>再起動ポリシー（restartPolicy）</strong>が設定されており、コンテナの再起動をどう扱うかを決めます
 
-| ポリシー  | 動作                                                            |
+{: .labeled}
+| ポリシー | 動作 |
 | --------- | --------------------------------------------------------------- |
-| Always    | コンテナが終了すると、終了理由に関わらず常に再起動する          |
+| Always | コンテナが終了すると、終了理由に関わらず常に再起動する |
 | OnFailure | コンテナが異常終了（終了コードが 0 以外）した場合のみ再起動する |
-| Never     | コンテナが終了しても再起動しない                                |
+| Never | コンテナが終了しても再起動しない |
 
 <strong>Always</strong>がデフォルトのポリシーです
 
 Web サーバーのように常時稼働が必要なアプリケーションでは Always を使い、バッチ処理のように一度実行すれば完了するタスクでは OnFailure や Never を使います
 
-### 再起動のバックオフ
+### [再起動のバックオフ](#restart-backoff) {#restart-backoff}
 
 コンテナが繰り返し異常終了する場合、kubelet は再起動の間隔を<strong>指数関数的に延長</strong>します
 
@@ -246,7 +249,7 @@ kubelet が再起動を繰り返しても解決しないため、間隔を広げ
 
 ---
 
-## ヘルスチェック（Probe）
+## [ヘルスチェック（Probe）](#health-check) {#health-check}
 
 コンテナが動いていても、アプリケーションが正常に機能しているとは限りません
 
@@ -254,19 +257,20 @@ kubelet が再起動を繰り返しても解決しないため、間隔を広げ
 
 このような状態を検知するために、Kubernetes は<strong>Probe（プローブ）</strong>と呼ばれるヘルスチェックの仕組みを提供しています
 
-### 3 種類の Probe
+### [3 種類の Probe](#three-probe-types) {#three-probe-types}
 
 Kubernetes には 3 種類の Probe があります
 
 それぞれ目的と失敗時の動作が異なります
 
-| Probe           | 目的                                                           | 失敗時の動作                                                                                                 |
+{: .labeled}
+| Probe | 目的 | 失敗時の動作 |
 | --------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Liveness Probe  | コンテナが生きているかを確認する                               | コンテナを再起動する                                                                                         |
-| Readiness Probe | コンテナがトラフィックを受け入れる準備ができているかを確認する | Service の EndpointSlice から Pod を除外する（再起動はしない）                                               |
-| Startup Probe   | コンテナの起動が完了したかを確認する                           | 成功するまで Liveness Probe と Readiness Probe を無効にする。failureThreshold に達するとコンテナを再起動する |
+| Liveness Probe | コンテナが生きているかを確認する | コンテナを再起動する |
+| Readiness Probe | コンテナがトラフィックを受け入れる準備ができているかを確認する | Service の EndpointSlice から Pod を除外する（再起動はしない） |
+| Startup Probe | コンテナの起動が完了したかを確認する | 成功するまで Liveness Probe と Readiness Probe を無効にする。failureThreshold に達するとコンテナを再起動する |
 
-### Liveness Probe（生存確認）
+### [Liveness Probe（生存確認）](#liveness-probe) {#liveness-probe}
 
 <strong>Liveness Probe</strong>は、<strong>コンテナが正常に動いているかを定期的に確認する</strong>仕組みです
 
@@ -278,7 +282,7 @@ Liveness Probe が失敗すると、kubelet はコンテナを再起動します
 
 kubelet がコンテナを再起動することで、アプリケーションが回復する可能性があります
 
-### Readiness Probe（受入準備確認）
+### [Readiness Probe（受入準備確認）](#readiness-probe) {#readiness-probe}
 
 <strong>Readiness Probe</strong>は、<strong>コンテナがトラフィックを受け入れる準備ができているかを定期的に確認する</strong>仕組みです
 
@@ -294,7 +298,7 @@ Readiness Probe は「一時的にトラフィックを受けられない状態�
 
 読み込みが完了し、Readiness Probe が成功すれば、Pod は再び EndpointSlice に追加され、トラフィックが転送されます
 
-### Startup Probe（起動確認）
+### [Startup Probe（起動確認）](#startup-probe) {#startup-probe}
 
 <strong>Startup Probe</strong>は、<strong>コンテナの起動が完了したかを確認する</strong>仕組みです
 
@@ -314,7 +318,7 @@ Startup Probe が failureThreshold に達して失敗した場合、kubelet は�
 
 これにより、起動に根本的な問題がある場合は、再起動を試みることができます
 
-### Compose のヘルスチェックとの比較
+### [Compose のヘルスチェックとの比較](#compose-health-check-comparison) {#compose-health-check-comparison}
 
 前のシリーズでコンテナの管理を学んだ方は、Compose のヘルスチェックを思い出すかもしれません
 
@@ -322,23 +326,24 @@ Compose のヘルスチェックは 1 種類のみで、「コンテナが正常
 
 Kubernetes は、これを 3 種類に分けることで、より細かい制御を可能にしています
 
-| 判定                       | Compose                        | Kubernetes      |
+{: .labeled}
+| 判定 | Compose | Kubernetes |
 | -------------------------- | ------------------------------ | --------------- |
-| コンテナが生きているか     | ヘルスチェック（1 種類で兼用） | Liveness Probe  |
-| トラフィックを受けられるか | 区別なし                       | Readiness Probe |
-| 起動が完了したか           | 区別なし                       | Startup Probe   |
+| コンテナが生きているか | ヘルスチェック（1 種類で兼用） | Liveness Probe |
+| トラフィックを受けられるか | 区別なし | Readiness Probe |
+| 起動が完了したか | 区別なし | Startup Probe |
 
 Compose では「正常かどうか」の二択でしたが、Kubernetes では「生きているが、まだトラフィックは受けられない」「起動中だから、まだ判定しない」といった中間状態を扱えます
 
 ---
 
-## Probe の実行方法
+## [Probe の実行方法](#probe-execution-methods) {#probe-execution-methods}
 
 Probe は、コンテナの正常性をどうやって確認するのでしょうか
 
 Kubernetes は、Probe の実行方法として主に 3 つの方法を提供しています
 
-### HTTP GET
+### [HTTP GET](#http-get) {#http-get}
 
 指定したパスとポートに HTTP GET リクエストを送信します
 
@@ -357,7 +362,7 @@ Web アプリケーションで最も一般的に使われる方法です
 
 アプリケーションにヘルスチェック用のエンドポイント（`/healthz` など）を用意し、そこにリクエストを送ります
 
-### TCP Socket
+### [TCP Socket](#tcp-socket) {#tcp-socket}
 
 指定したポートに TCP 接続を試みます
 
@@ -373,7 +378,7 @@ livenessProbe:
 
 HTTP エンドポイントを持たないアプリケーション（データベースなど）に適しています
 
-### コマンド実行（exec）
+### [コマンド実行（exec）](#exec-command) {#exec-command}
 
 コンテナ内で指定したコマンドを実行します
 
@@ -391,17 +396,18 @@ livenessProbe:
 
 HTTP や TCP では判定できない、アプリケーション固有の正常性確認に使われます
 
-### Probe の設定パラメータ
+### [Probe の設定パラメータ](#probe-configuration-parameters) {#probe-configuration-parameters}
 
 Probe の動作は、以下のパラメータで制御します
 
-| パラメータ          | 説明                                                        | デフォルト値 |
+{: .labeled}
+| パラメータ | 説明 | デフォルト値 |
 | ------------------- | ----------------------------------------------------------- | ------------ |
-| initialDelaySeconds | コンテナ起動後、最初の Probe を実行するまでの待ち時間（秒） | 0            |
-| periodSeconds       | Probe を実行する間隔（秒）                                  | 10           |
-| timeoutSeconds      | Probe のタイムアウト（秒）                                  | 1            |
-| successThreshold    | 失敗後、成功と判定するために必要な連続成功回数              | 1            |
-| failureThreshold    | 失敗と判定するために必要な連続失敗回数                      | 3            |
+| initialDelaySeconds | コンテナ起動後、最初の Probe を実行するまでの待ち時間（秒） | 0 |
+| periodSeconds | Probe を実行する間隔（秒） | 10 |
+| timeoutSeconds | Probe のタイムアウト（秒） | 1 |
+| successThreshold | 失敗後、成功と判定するために必要な連続成功回数 | 1 |
+| failureThreshold | 失敗と判定するために必要な連続失敗回数 | 3 |
 
 たとえば、`failureThreshold: 3` かつ `periodSeconds: 10` の場合、Probe が 3 回連続で失敗する（約 30 秒間応答がない）とアクションが実行されます
 
@@ -409,13 +415,13 @@ Liveness Probe であればコンテナが再起動され、Readiness Probe で�
 
 ---
 
-## ノード障害とリカバリ
+## [ノード障害とリカバリ](#node-failure-and-recovery) {#node-failure-and-recovery}
 
 ここまで、Pod 内のコンテナレベルでのセルフヒーリングを見てきました
 
 しかし、Pod が動いているノード自体がダウンした場合はどうなるでしょうか
 
-### ノードの監視とハートビート
+### [ノードの監視とハートビート](#node-monitoring-and-heartbeat) {#node-monitoring-and-heartbeat}
 
 Kubernetes は、各ノードの正常性を<strong>ハートビート</strong>で確認しています
 
@@ -423,22 +429,23 @@ Kubernetes は、各ノードの正常性を<strong>ハートビート</strong>�
 
 ハートビートには 2 つの形式があります
 
-| 形式                     | 説明                                                                                        |
+{: .labeled}
+| 形式 | 説明 |
 | ------------------------ | ------------------------------------------------------------------------------------------- |
-| ノードステータスの更新   | ノードの状態（CPU、メモリ、ディスクの状態、ネットワークの状態など）を API Server に報告する |
-| Lease オブジェクトの更新 | `kube-node-lease` Namespace に Lease オブジェクトを作成し、定期的に更新する                 |
+| ノードステータスの更新 | ノードの状態（CPU、メモリ、ディスクの状態、ネットワークの状態など）を API Server に報告する |
+| Lease オブジェクトの更新 | `kube-node-lease` Namespace に Lease オブジェクトを作成し、定期的に更新する |
 
 Lease オブジェクトは軽量な「心拍」として機能します
 
 ノードステータスの更新は多くの情報を含むため頻繁に送ると負荷がかかりますが、Lease オブジェクトの更新は軽量で、ノードの可用性を効率的に確認できます
 
-### Node コントローラによる障害検知
+### [Node コントローラによる障害検知](#node-controller-failure-detection) {#node-controller-failure-detection}
 
 コントロールプレーンの<strong>Node コントローラ</strong>は、ノードのハートビートを監視しています
 
 ノードからのハートビートが一定期間（デフォルトでは 50 秒）途絶えると、Node コントローラはそのノードの状態を<strong>NotReady</strong>に変更します
 
-### ノード障害時の Pod 退避
+### [ノード障害時の Pod 退避](#pod-eviction-on-node-failure) {#pod-eviction-on-node-failure}
 
 ノードが NotReady になると、そのノード上の Pod は以下の流れで退避されます
 
@@ -448,7 +455,7 @@ Node コントローラは、NotReady になったノードに `node.kubernetes.
 
 Taint とは、ノードに「このノードには問題がある」というマークを付ける仕組みです
 
-[03-scheduling](./03-scheduling.md) で学んだように、Taint が付いたノードには、対応する Toleration を持たない Pod はスケジュールされません
+[03-scheduling](../03-scheduling/) で学んだように、Taint が付いたノードには、対応する Toleration を持たない Pod はスケジュールされません
 
 <strong>2. Pod の退避</strong>
 
@@ -493,11 +500,11 @@ Readiness Probe によって NotReady な Pod は既に EndpointSlice から除�
 
 ---
 
-## セルフヒーリングの全体像
+## [セルフヒーリングの全体像](#self-healing-overview) {#self-healing-overview}
 
 ここまで学んだ仕組みを、3 つのレベルに整理してまとめます
 
-### 3 層のセルフヒーリング
+### [3 層のセルフヒーリング](#three-layer-self-healing) {#three-layer-self-healing}
 
 Kubernetes のセルフヒーリングは、3 つのレベルで構成されています
 
@@ -521,15 +528,16 @@ Scheduler が新しい Pod を適切なノードに配置し、kubelet が起動
 
 そのノード上の Pod は退避され、レベル 2 の仕組みで別のノードに再作成されます
 
-### 各レベルの比較
+### [各レベルの比較](#level-comparison) {#level-comparison}
 
-| レベル         | 担当                    | 対象                                    | 復旧方法           | 速度           |
+{: .labeled}
+| レベル | 担当 | 対象 | 復旧方法 | 速度 |
 | -------------- | ----------------------- | --------------------------------------- | ------------------ | -------------- |
-| コンテナレベル | kubelet                 | コンテナの異常終了、Liveness Probe 失敗 | コンテナの再起動   | 速い（秒単位） |
-| レプリカレベル | ReplicaSet コントローラ | Pod の消失                              | 新しい Pod の作成  | 中程度         |
-| ノードレベル   | Node コントローラ       | ノードの応答停止                        | Pod の退避と再作成 | 遅い（分単位） |
+| コンテナレベル | kubelet | コンテナの異常終了、Liveness Probe 失敗 | コンテナの再起動 | 速い（秒単位） |
+| レプリカレベル | ReplicaSet コントローラ | Pod の消失 | 新しい Pod の作成 | 中程度 |
+| ノードレベル | Node コントローラ | ノードの応答停止 | Pod の退避と再作成 | 遅い（分単位） |
 
-### セルフヒーリングとあるべき状態
+### [セルフヒーリングとあるべき状態](#self-healing-and-desired-state) {#self-healing-and-desired-state}
 
 セルフヒーリングは、あるべき状態を実現するための仕組みの 1 つです
 
@@ -545,7 +553,7 @@ Kubernetes が Reconciliation Loop を通じて、自動的にあるべき状態
 
 ---
 
-## 次のトピックへ
+## [次のトピックへ](#next-topic) {#next-topic}
 
 このトピックでは、以下のことを学びました
 
@@ -567,56 +575,57 @@ Kubernetes が Reconciliation Loop を通じて、自動的にあるべき状態
 
 負荷が下がったとき、再び Pod の数を減らすことはできるのでしょうか？
 
-次のトピック [06-scaling](./06-scaling.md) では、<strong>スケーリング</strong>の仕組みを学びます
+次のトピック [06-scaling](../06-scaling/) では、<strong>スケーリング</strong>の仕組みを学びます
 
 あるべき状態の「維持」から「動的な変更」へと進みます
 
 ---
 
-## 用語集
+## [用語集](#glossary) {#glossary}
 
-| 用語                              | 説明                                                                                                                  |
+{: .labeled}
+| 用語 | 説明 |
 | --------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| セルフヒーリング（Self-Healing）  | 障害を自動で検知し、あるべき状態に戻すための調整を自動で行う仕組み                                                    |
-| Reconciliation Loop（調整ループ） | 観察→比較→調整のサイクルを継続的に繰り返し、実際の状態をあるべき状態に収束させるメカニズム                            |
-| コントローラ（Controller）        | 特定のリソースのあるべき状態を維持する責任を持つ制御ループ。Controller Manager に内包される                           |
-| ReplicaSet コントローラ           | 指定された数の Pod レプリカを維持するコントローラ。Pod の数が不足すれば作成し、過剰なら削除する                       |
-| Node コントローラ                 | ノードの状態を監視し、応答がないノードを検知するコントローラ                                                          |
-| 再起動ポリシー（restartPolicy）   | コンテナの終了時に kubelet がどう対応するかを決めるポリシー。Always、OnFailure、Never の 3 種類がある                 |
-| CrashLoopBackOff                  | コンテナが繰り返し異常終了し、kubelet が再起動の間隔を指数関数的に延長している状態                                    |
-| Probe（プローブ）                 | kubelet がコンテナに対して定期的に実行するヘルスチェック                                                              |
-| Liveness Probe                    | コンテナが生きているかを確認する Probe。失敗するとコンテナが再起動される                                              |
-| Readiness Probe                   | コンテナがトラフィックを受け入れる準備ができているかを確認する Probe。失敗すると EndpointSlice から Pod が除外される  |
-| Startup Probe                     | コンテナの起動が完了したかを確認する Probe。成功するまで Liveness Probe と Readiness Probe が無効になる               |
-| ハートビート（Heartbeat）         | ノードがコントロールプレーンに対して定期的に送信する生存報告。ノードステータスの更新と Lease オブジェクトの更新がある |
-| Lease オブジェクト                | ノードの可用性を効率的に確認するための軽量なリソース。kube-node-lease Namespace に作成される                          |
-| NotReady                          | ノードがハートビートを送信しなくなった場合にマークされる状態                                                          |
-| Taint（テイント）                 | ノードに「問題がある」ことをマークする仕組み。対応する Toleration を持たない Pod はスケジュールされない               |
-| Toleration（トレレーション）      | 特定の Taint を許容するための Pod 側の設定                                                                            |
-| デッドロック（Deadlock）          | 複数の処理が互いの完了を待ち合い、どの処理も進めなくなる状態                                                          |
+| セルフヒーリング（Self-Healing） | 障害を自動で検知し、あるべき状態に戻すための調整を自動で行う仕組み |
+| Reconciliation Loop（調整ループ） | 観察→比較→調整のサイクルを継続的に繰り返し、実際の状態をあるべき状態に収束させるメカニズム |
+| コントローラ（Controller） | 特定のリソースのあるべき状態を維持する責任を持つ制御ループ。Controller Manager に内包される |
+| ReplicaSet コントローラ | 指定された数の Pod レプリカを維持するコントローラ。Pod の数が不足すれば作成し、過剰なら削除する |
+| Node コントローラ | ノードの状態を監視し、応答がないノードを検知するコントローラ |
+| 再起動ポリシー（restartPolicy） | コンテナの終了時に kubelet がどう対応するかを決めるポリシー。Always、OnFailure、Never の 3 種類がある |
+| CrashLoopBackOff | コンテナが繰り返し異常終了し、kubelet が再起動の間隔を指数関数的に延長している状態 |
+| Probe（プローブ） | kubelet がコンテナに対して定期的に実行するヘルスチェック |
+| Liveness Probe | コンテナが生きているかを確認する Probe。失敗するとコンテナが再起動される |
+| Readiness Probe | コンテナがトラフィックを受け入れる準備ができているかを確認する Probe。失敗すると EndpointSlice から Pod が除外される |
+| Startup Probe | コンテナの起動が完了したかを確認する Probe。成功するまで Liveness Probe と Readiness Probe が無効になる |
+| ハートビート（Heartbeat） | ノードがコントロールプレーンに対して定期的に送信する生存報告。ノードステータスの更新と Lease オブジェクトの更新がある |
+| Lease オブジェクト | ノードの可用性を効率的に確認するための軽量なリソース。kube-node-lease Namespace に作成される |
+| NotReady | ノードがハートビートを送信しなくなった場合にマークされる状態 |
+| Taint（テイント） | ノードに「問題がある」ことをマークする仕組み。対応する Toleration を持たない Pod はスケジュールされない |
+| Toleration（トレレーション） | 特定の Taint を許容するための Pod 側の設定 |
+| デッドロック（Deadlock） | 複数の処理が互いの完了を待ち合い、どの処理も進めなくなる状態 |
 
 ---
 
-## 参考資料
+## [参考資料](#references) {#references}
 
 このページの内容は、以下のソースに基づいています
 
 <strong>Pod のライフサイクル</strong>
 
-- [Pod Lifecycle](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/)
+- [Pod Lifecycle](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/){:target="\_blank"}
   - Pod のフェーズ、コンテナの状態、再起動ポリシーの公式ドキュメント
 
 <strong>ヘルスチェック</strong>
 
-- [Configure Liveness, Readiness and Startup Probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+- [Configure Liveness, Readiness and Startup Probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/){:target="\_blank"}
   - Liveness Probe、Readiness Probe、Startup Probe の設定方法の公式ドキュメント
 
 <strong>ノード管理</strong>
 
-- [Nodes](https://kubernetes.io/docs/concepts/architecture/nodes/)
+- [Nodes](https://kubernetes.io/docs/concepts/architecture/nodes/){:target="\_blank"}
   - Node コントローラ、ハートビート、ノード障害時の動作の公式ドキュメント
 
 <strong>ワークロード管理</strong>
 
-- [ReplicaSet](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/)
+- [ReplicaSet](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/){:target="\_blank"}
   - ReplicaSet の仕組みの公式ドキュメント

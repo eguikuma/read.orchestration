@@ -1,12 +1,13 @@
-<div align="right">
-<img src="https://img.shields.io/badge/AI-ASSISTED_STUDY-3b82f6?style=for-the-badge&labelColor=1e293b&logo=bookstack&logoColor=white" alt="AI Assisted Study" />
-</div>
+---
+layout: default
+title: アーキテクチャ
+---
 
-# 02-architecture：アーキテクチャ
+# [02-architecture：アーキテクチャ](#architecture) {#architecture}
 
-## はじめに
+## [はじめに](#introduction) {#introduction}
 
-前のトピック [01-orchestration](./01-orchestration.md) では、Compose の限界から出発し、コンテナオーケストレーションがなぜ必要かを学びました
+前のトピック [01-orchestration](../01-orchestration/) では、Compose の限界から出発し、コンテナオーケストレーションがなぜ必要かを学びました
 
 複数のマシン（ノード）にまたがるコンテナ群を自動で管理する仕組みとして、スケジューリング、管理、ネットワーキングの 3 つの柱を確認しました
 
@@ -24,7 +25,7 @@ Kubernetes を例に、コントロールプレーンとノードの分離、各
 
 ---
 
-## 日常の例え
+## [日常の例え](#everyday-analogy) {#everyday-analogy}
 
 アーキテクチャの考え方を、日常の例えで見てみましょう
 
@@ -56,7 +57,7 @@ Kubernetes を例に、コントロールプレーンとノードの分離、各
 
 ---
 
-## このページで学ぶこと
+## [このページで学ぶこと](#what-you-will-learn) {#what-you-will-learn}
 
 このページでは、以下の概念を学びます
 
@@ -96,26 +97,26 @@ Kubernetes を例に、コントロールプレーンとノードの分離、各
 
 ---
 
-## 目次
+## [目次](#table-of-contents) {#table-of-contents}
 
-1. [クラスタの全体構造](#クラスタの全体構造)
-2. [コントロールプレーン](#コントロールプレーン)
-3. [API Server（クラスタの窓口）](#api-serverクラスタの窓口)
-4. [etcd（クラスタの記憶）](#etcdクラスタの記憶)
-5. [Scheduler（配置の決定）](#scheduler配置の決定)
-6. [Controller Manager（あるべき状態の維持）](#controller-managerあるべき状態の維持)
-7. [ノード](#ノード)
-8. [kubelet（ノードのエージェント）](#kubeletノードのエージェント)
-9. [コンテナランタイム](#コンテナランタイム)
-10. [kube-proxy（ネットワークの管理）](#kube-proxyネットワークの管理)
-11. [あるべき状態（Desired State）](#あるべき状態desired-state)
-12. [次のトピックへ](#次のトピックへ)
-13. [用語集](#用語集)
-14. [参考資料](#参考資料)
+1. [クラスタの全体構造](#cluster-structure)
+2. [コントロールプレーン](#control-plane)
+3. [API Server（クラスタの窓口）](#api-server)
+4. [etcd（クラスタの記憶）](#etcd)
+5. [Scheduler（配置の決定）](#scheduler)
+6. [Controller Manager（あるべき状態の維持）](#controller-manager)
+7. [ノード](#node)
+8. [kubelet（ノードのエージェント）](#kubelet)
+9. [コンテナランタイム](#container-runtime)
+10. [kube-proxy（ネットワークの管理）](#kube-proxy)
+11. [あるべき状態（Desired State）](#desired-state)
+12. [次のトピックへ](#next-topic)
+13. [用語集](#glossary)
+14. [参考資料](#references)
 
 ---
 
-## クラスタの全体構造
+## [クラスタの全体構造](#cluster-structure) {#cluster-structure}
 
 前のトピックで、クラスタとは複数のマシンを 1 つのまとまりとして管理するグループであると学びました
 
@@ -171,7 +172,7 @@ Kubernetes を例に、コントロールプレーンとノードの分離、各
 
 API Server が通信の中心（ハブ）として機能することで、コンポーネント同士が直接やり取りする複雑さを避けています
 
-### Pod とは
+### [Pod とは](#what-is-pod) {#what-is-pod}
 
 ここで、<strong>Pod</strong>という用語を導入します
 
@@ -189,15 +190,16 @@ Pod は Kubernetes のスケジューリングの最小単位であり、Schedul
 
 ---
 
-## コントロールプレーン
+## [コントロールプレーン](#control-plane) {#control-plane}
 
 コントロールプレーンは、4 つの主要なコンポーネントで構成されます
 
-| コンポーネント     | 役割                                             |
+{: .labeled}
+| コンポーネント | 役割 |
 | ------------------ | ------------------------------------------------ |
-| API Server         | クラスタへのすべての操作を受け付ける窓口         |
-| etcd               | クラスタの全状態を保存する分散データストア       |
-| Scheduler          | Pod をどのノードで実行するかを決定する           |
+| API Server | クラスタへのすべての操作を受け付ける窓口 |
+| etcd | クラスタの全状態を保存する分散データストア |
+| Scheduler | Pod をどのノードで実行するかを決定する |
 | Controller Manager | あるべき状態と実際の状態を比較し、差分を修正する |
 
 これらは互いに独立したプロセスとして動作しますが、API Server を中心に連携しています
@@ -206,7 +208,7 @@ Pod は Kubernetes のスケジューリングの最小単位であり、Schedul
 
 ---
 
-## API Server（クラスタの窓口）
+## [API Server（クラスタの窓口）](#api-server) {#api-server}
 
 <strong>API Server（kube-apiserver）</strong>は、クラスタに対するすべての操作を受け付ける<strong>唯一の窓口</strong>です
 
@@ -218,7 +220,7 @@ RESTful API とは、HTTP プロトコルを使ってリソースを操作する
 
 たとえば「Pod の一覧を取得する」「新しい Pod を作成する」「既存の Pod を削除する」といった操作を、HTTP リクエストとして表現します
 
-### API Server の役割
+### [API Server の役割](#api-server-role) {#api-server-role}
 
 API Server は、以下の処理を行います
 
@@ -240,14 +242,15 @@ API Server は、etcd と直接通信する<strong>唯一のコンポーネン�
 
 他のコンポーネント（Scheduler、Controller Manager、kubelet）は、etcd のデータに直接アクセスせず、必ず API Server を経由します
 
-### 誰が API Server と通信するか
+### [誰が API Server と通信するか](#api-server-clients) {#api-server-clients}
 
-| コンポーネント       | 通信の目的                                               |
+{: .labeled}
+| コンポーネント | 通信の目的 |
 | -------------------- | -------------------------------------------------------- |
-| 管理者（kubectl 等） | クラスタの操作（Pod の作成、状態の確認、設定変更）       |
-| Scheduler            | 未割り当ての Pod を監視し、割り当て結果を報告する        |
-| Controller Manager   | リソースの状態を監視し、あるべき状態との差分を修正する   |
-| kubelet              | ノードと Pod の状態を報告し、新しい Pod の仕様を取得する |
+| 管理者（kubectl 等） | クラスタの操作（Pod の作成、状態の確認、設定変更） |
+| Scheduler | 未割り当ての Pod を監視し、割り当て結果を報告する |
+| Controller Manager | リソースの状態を監視し、あるべき状態との差分を修正する |
+| kubelet | ノードと Pod の状態を報告し、新しい Pod の仕様を取得する |
 
 すべての通信が API Server を経由する設計には、大きな利点があります
 
@@ -255,7 +258,7 @@ API Server は、etcd と直接通信する<strong>唯一のコンポーネン�
 
 ---
 
-## etcd（クラスタの記憶）
+## [etcd（クラスタの記憶）](#etcd) {#etcd}
 
 <strong>etcd</strong>は、クラスタのすべての状態を保存する<strong>分散キーバリューストア</strong>です
 
@@ -263,7 +266,7 @@ API Server は、etcd と直接通信する<strong>唯一のコンポーネン�
 
 たとえば、`/registry/pods/default/web-server` というキーに、`web-server` Pod の全情報（どのノードで動いているか、どのイメージを使っているか、状態は何かなど）がバリューとして保存されます
 
-### etcd が「クラスタの記憶」である理由
+### [etcd が「クラスタの記憶」である理由](#etcd-as-cluster-memory) {#etcd-as-cluster-memory}
 
 etcd には、クラスタに関するすべての情報が保存されています
 
@@ -282,7 +285,7 @@ etcd は<strong>唯一の情報源（Single Source of Truth）</strong>です
 
 これにより、コンポーネントが再起動されても、etcd に記録された状態から処理を再開できます
 
-### 分散と冗長性
+### [分散と冗長性](#distribution-and-redundancy) {#distribution-and-redundancy}
 
 etcd は「分散」キーバリューストアと呼ばれます
 
@@ -296,15 +299,16 @@ Raft は、複数のノードが「どのデータが正しいか」について
 
 詳細は「In Search of an Understandable Consensus Algorithm」（Ongaro & Ousterhout, 2014）で解説されていますが、ここでは「etcd は複数インスタンスで動作し、1 つが壊れてもデータが失われない」という点を理解すれば十分です
 
-### なぜ API Server だけが etcd にアクセスするのか
+### [なぜ API Server だけが etcd にアクセスするのか](#why-api-server-only-accesses-etcd) {#why-api-server-only-accesses-etcd}
 
 etcd への直接アクセスを API Server に限定することで、以下の利点が生まれます
 
-| 利点               | 説明                                                                                 |
+{: .labeled}
+| 利点 | 説明 |
 | ------------------ | ------------------------------------------------------------------------------------ |
-| 一貫性の保証       | すべての書き込みが API Server の検証を通るため、不正なデータが etcd に書き込まれない |
-| アクセス制御の集約 | 認証・認可を API Server の 1 か所で管理できる                                        |
-| 変更通知の一元化   | API Server が変更を検知し、関心のあるコンポーネントに通知できる（Watch 機能）        |
+| 一貫性の保証 | すべての書き込みが API Server の検証を通るため、不正なデータが etcd に書き込まれない |
+| アクセス制御の集約 | 認証・認可を API Server の 1 か所で管理できる |
+| 変更通知の一元化 | API Server が変更を検知し、関心のあるコンポーネントに通知できる（Watch 機能） |
 
 <strong>Watch 機能</strong>は、特に重要な仕組みです
 
@@ -316,7 +320,7 @@ Scheduler や Controller Manager は、API Server に対して「この種類の
 
 ---
 
-## Scheduler（配置の決定）
+## [Scheduler（配置の決定）](#scheduler) {#scheduler}
 
 <strong>Scheduler（kube-scheduler）</strong>は、<strong>まだノードに割り当てられていない Pod を見つけ、適切なノードを選んで割り当てる</strong>コンポーネントです
 
@@ -326,7 +330,7 @@ Pod が作成されると、最初はどのノードにも割り当てられて�
 
 Scheduler はこの未割り当ての Pod を検知し、クラスタ内のノードの中から最適なノードを選びます
 
-### Scheduler は Pod を起動しない
+### [Scheduler は Pod を起動しない](#scheduler-does-not-start-pods) {#scheduler-does-not-start-pods}
 
 ここで重要なのは、<strong>Scheduler は Pod の配置先を決めるだけ</strong>ということです
 
@@ -336,7 +340,7 @@ Scheduler は「この Pod はノード 2 で動かすべきだ」と判断し�
 
 航空管制塔が「この飛行機は第 3 滑走路を使え」と指示するだけで、実際に飛行機を操縦するのはパイロットであるのと同じです
 
-### ノード選択の流れ
+### [ノード選択の流れ](#node-selection-flow) {#node-selection-flow}
 
 Scheduler がノードを選ぶ流れは、大きく 2 段階に分かれます
 
@@ -358,30 +362,31 @@ Scheduler がノードを選ぶ流れは、大きく 2 段階に分かれます
 
 最もスコアの高いノードが、Pod の配置先として選ばれます
 
-スケジューリングの詳細なアルゴリズム（リソース要求、アフィニティ、テイントなど）は、次のトピック [03-scheduling](./03-scheduling.md) で学びます
+スケジューリングの詳細なアルゴリズム（リソース要求、アフィニティ、テイントなど）は、次のトピック [03-scheduling](../03-scheduling/) で学びます
 
-### OS スケジューラとの対比
+### [OS スケジューラとの対比](#os-scheduler-comparison) {#os-scheduler-comparison}
 
 前のシリーズでカーネル空間を学んだ方は、OS のプロセススケジューラを思い出すかもしれません
 
-| 比較項目 | OS スケジューラ        | Kubernetes Scheduler           |
+{: .labeled}
+| 比較項目 | OS スケジューラ | Kubernetes Scheduler |
 | -------- | ---------------------- | ------------------------------ |
-| 対象     | プロセス / スレッド    | Pod                            |
-| 配置先   | CPU コア               | ノード（マシン）               |
+| 対象 | プロセス / スレッド | Pod |
+| 配置先 | CPU コア | ノード（マシン） |
 | 判断基準 | 優先度、タイムスライス | リソース要求、制約条件、スコア |
-| 実行頻度 | ミリ秒単位             | Pod の作成時                   |
+| 実行頻度 | ミリ秒単位 | Pod の作成時 |
 
 対象と規模は異なりますが、「限られたリソースに対して、何をどこで実行するかを決める」という原理は共通しています
 
 ---
 
-## Controller Manager（あるべき状態の維持）
+## [Controller Manager（あるべき状態の維持）](#controller-manager) {#controller-manager}
 
 <strong>Controller Manager（kube-controller-manager）</strong>は、<strong>あるべき状態と実際の状態を比較し、差分があれば修正する</strong>コンポーネントです
 
 前のトピックで導入した「あるべき状態（Desired State）」の概念を、実際に実行に移す役割を担います
 
-### コントローラとは
+### [コントローラとは](#what-is-controller) {#what-is-controller}
 
 Controller Manager は、複数の<strong>コントローラ</strong>を内包しています
 
@@ -393,20 +398,21 @@ Controller Manager は、複数の<strong>コントローラ</strong>を内包�
 
 逆に、Pod が 4 つ動いている場合は、1 つを削除します
 
-### 主要なコントローラ
+### [主要なコントローラ](#major-controllers) {#major-controllers}
 
-| コントローラ            | 担当するリソース | 役割                                                  |
+{: .labeled}
+| コントローラ | 担当するリソース | 役割 |
 | ----------------------- | ---------------- | ----------------------------------------------------- |
-| ReplicaSet コントローラ | ReplicaSet       | 指定された数の Pod レプリカを維持する                 |
-| Deployment コントローラ | Deployment       | ReplicaSet を管理し、ローリングアップデートを制御する |
-| Node コントローラ       | Node             | ノードの状態を監視し、応答がないノードを検知する      |
-| Job コントローラ        | Job              | 一度だけ実行するタスク（バッチ処理）を管理する        |
+| ReplicaSet コントローラ | ReplicaSet | 指定された数の Pod レプリカを維持する |
+| Deployment コントローラ | Deployment | ReplicaSet を管理し、ローリングアップデートを制御する |
+| Node コントローラ | Node | ノードの状態を監視し、応答がないノードを検知する |
+| Job コントローラ | Job | 一度だけ実行するタスク（バッチ処理）を管理する |
 
 各コントローラは独立して動作し、自分の担当するリソースだけに集中します
 
 この設計により、あるコントローラに問題が起きても、他のコントローラの動作には影響しません
 
-### Reconciliation Loop の具体例
+### [Reconciliation Loop の具体例](#reconciliation-loop-example) {#reconciliation-loop-example}
 
 コントローラの動作を、<strong>ReplicaSet コントローラ</strong>の具体例で見てみましょう
 
@@ -449,17 +455,18 @@ ReplicaSet コントローラは、Pod が 1 つ不足していることを検�
 
 ---
 
-## ノード
+## [ノード](#node) {#node}
 
 ノードは、コンテナ（Pod）を実際に動かすマシンです
 
 各ノードには、以下の 3 つのコンポーネントが動作しています
 
-| コンポーネント     | 役割                                                  |
+{: .labeled}
+| コンポーネント | 役割 |
 | ------------------ | ----------------------------------------------------- |
-| kubelet            | コントロールプレーンからの指示を受けて Pod を管理する |
-| コンテナランタイム | コンテナを実際に起動・停止する                        |
-| kube-proxy         | ネットワークルールを管理し、Pod への通信を制御する    |
+| kubelet | コントロールプレーンからの指示を受けて Pod を管理する |
+| コンテナランタイム | コンテナを実際に起動・停止する |
+| kube-proxy | ネットワークルールを管理し、Pod への通信を制御する |
 
 これらのコンポーネントは、すべてのノードで同じように動作します
 
@@ -467,7 +474,7 @@ ReplicaSet コントローラは、Pod が 1 つ不足していることを検�
 
 ---
 
-## kubelet（ノードのエージェント）
+## [kubelet（ノードのエージェント）](#kubelet) {#kubelet}
 
 <strong>kubelet</strong>は、各ノード上で動作する<strong>エージェント</strong>です
 
@@ -475,7 +482,7 @@ ReplicaSet コントローラは、Pod が 1 つ不足していることを検�
 
 kubelet は、コントロールプレーンとノードを橋渡しする存在です
 
-### kubelet の役割
+### [kubelet の役割](#kubelet-role) {#kubelet-role}
 
 <strong>Pod の仕様の取得と実行</strong>
 
@@ -497,7 +504,7 @@ kubelet は、Pod に設定されたヘルスチェック（Liveness Probe、Rea
 
 ヘルスチェックが失敗した場合、kubelet はコンテナを再起動するなどの対応を行います
 
-### kubelet とコンテナランタイムの関係
+### [kubelet とコンテナランタイムの関係](#kubelet-and-container-runtime-relationship) {#kubelet-and-container-runtime-relationship}
 
 kubelet は、コンテナを直接操作しません
 
@@ -509,13 +516,13 @@ kubelet は CRI に準拠した命令を出すだけで、その先のコンテ�
 
 ---
 
-## コンテナランタイム
+## [コンテナランタイム](#container-runtime) {#container-runtime}
 
 <strong>コンテナランタイム</strong>は、コンテナを実際に起動・停止・管理するソフトウェアです
 
 kubelet から CRI を通じて「このコンテナを起動せよ」という指示を受け、コンテナを作成します
 
-### CRI（Container Runtime Interface）
+### [CRI（Container Runtime Interface）](#cri) {#cri}
 
 前のシリーズでコンテナの仕組みを学んだ方は、containerd や runc といったコンテナランタイムを思い出すかもしれません
 
@@ -525,7 +532,7 @@ CRI を使うことで、Kubernetes はコンテナランタイムの実装に�
 
 CRI に準拠していれば、どのランタイムでも使用できます
 
-### コンテナ起動の流れ
+### [コンテナ起動の流れ](#container-startup-flow) {#container-startup-flow}
 
 kubelet がコンテナランタイムにコンテナの起動を依頼する流れは、以下のようになります
 
@@ -569,7 +576,7 @@ Kubernetes はこれらの既存技術の上に構築されています
 
 ---
 
-## kube-proxy（ネットワークの管理）
+## [kube-proxy（ネットワークの管理）](#kube-proxy) {#kube-proxy}
 
 <strong>kube-proxy</strong>は、各ノード上で動作し、<strong>ネットワークルールを管理する</strong>コンポーネントです
 
@@ -591,17 +598,17 @@ kube-proxy は、このService が機能するために必要なネットワー�
 
 具体的には、Service 宛ての通信を適切な Pod に転送するルールを管理します
 
-Service とサービスディスカバリの詳細は、[04-service-discovery](./04-service-discovery.md) で学びます
+Service とサービスディスカバリの詳細は、[04-service-discovery](../04-service-discovery/) で学びます
 
 ---
 
-## あるべき状態（Desired State）
+## [あるべき状態（Desired State）](#desired-state) {#desired-state}
 
 ここまで、コントロールプレーンとノードの各コンポーネントの役割を見てきました
 
 このセクションでは、それらを貫く<strong>最も重要な概念</strong>である「あるべき状態（Desired State）」を掘り下げます
 
-### 宣言的と命令的
+### [宣言的と命令的](#declarative-and-imperative) {#declarative-and-imperative}
 
 前のトピックで簡単に触れた「宣言的」と「命令的」の違いを、もう少し詳しく見てみましょう
 
@@ -635,7 +642,7 @@ Web サーバーの Pod を常に 3 つ動かす
 
 宣言的な方法では、管理者は「何をしたいか」を伝えるだけで、「どうやるか」はシステムに任せます
 
-### Reconciliation Loop（調整ループ）
+### [Reconciliation Loop（調整ループ）](#reconciliation-loop) {#reconciliation-loop}
 
 あるべき状態を実現するために、Kubernetes は<strong>Reconciliation Loop（調整ループ）</strong>というメカニズムを使います
 
@@ -689,7 +696,7 @@ etcd に記録されているあるべき状態と、実際の状態を比較し
 
 変更があっても、障害が起きても、この調整ループが継続的に動くことで、システムは常にあるべき状態に向かって収束します
 
-### マニフェストによる宣言
+### [マニフェストによる宣言](#manifest-declaration) {#manifest-declaration}
 
 あるべき状態は、<strong>マニフェスト</strong>と呼ばれる定義ファイルで記述します
 
@@ -731,35 +738,37 @@ Pod が 4 つに増えれば、1 つを削除します
 
 管理者がすべきことは、「あるべき状態」をマニフェストに書いて API Server に送るだけです
 
-### あるべき状態と各コンポーネントの関係
+### [あるべき状態と各コンポーネントの関係](#desired-state-and-components-relationship) {#desired-state-and-components-relationship}
 
 ここまで学んだコンポーネントが、あるべき状態の維持にどう関わるかをまとめます
 
-| コンポーネント     | あるべき状態との関わり                                               |
+{: .labeled}
+| コンポーネント | あるべき状態との関わり |
 | ------------------ | -------------------------------------------------------------------- |
-| etcd               | あるべき状態と実際の状態を保存する                                   |
-| API Server         | あるべき状態の登録・変更を受け付け、各コンポーネントに変更を通知する |
-| Controller Manager | あるべき状態と実際の状態を比較し、差分を修正するアクションを起こす   |
-| Scheduler          | Controller Manager が作成した Pod を、適切なノードに割り当てる       |
-| kubelet            | 割り当てられた Pod を実際に起動し、状態を報告する                    |
+| etcd | あるべき状態と実際の状態を保存する |
+| API Server | あるべき状態の登録・変更を受け付け、各コンポーネントに変更を通知する |
+| Controller Manager | あるべき状態と実際の状態を比較し、差分を修正するアクションを起こす |
+| Scheduler | Controller Manager が作成した Pod を、適切なノードに割り当てる |
+| kubelet | 割り当てられた Pod を実際に起動し、状態を報告する |
 
 この協調動作によって、管理者が宣言した「あるべき状態」が実現され、維持されます
 
-### このリポジトリ全体との関係
+### [このリポジトリ全体との関係](#repository-relationship) {#repository-relationship}
 
 「あるべき状態」の概念は、以降のすべてのトピックに登場します
 
-| トピック                                                    | あるべき状態との関係                                                     |
+{: .labeled}
+| トピック | あるべき状態との関係 |
 | ----------------------------------------------------------- | ------------------------------------------------------------------------ |
-| [03-scheduling](./03-scheduling.md)                         | あるべき状態を実現するために、Pod をどのノードに配置するかを決める       |
-| [04-service-discovery](./04-service-discovery.md)           | Pod が再作成されて IP が変わっても、Service が安定したアクセスを維持する |
-| [05-self-healing](./05-self-healing.md)                     | 実際の状態があるべき状態から逸脱したとき、自動で修復する仕組み           |
-| [06-scaling](./06-scaling.md)                               | 負荷に応じてあるべき状態そのものを動的に変更する仕組み                   |
-| [07-declarative-management](./07-declarative-management.md) | あるべき状態をマニフェストとして管理する方法と全体の統合                 |
+| [03-scheduling](../03-scheduling/) | あるべき状態を実現するために、Pod をどのノードに配置するかを決める |
+| [04-service-discovery](../04-service-discovery/) | Pod が再作成されて IP が変わっても、Service が安定したアクセスを維持する |
+| [05-self-healing](../05-self-healing/) | 実際の状態があるべき状態から逸脱したとき、自動で修復する仕組み |
+| [06-scaling](../06-scaling/) | 負荷に応じてあるべき状態そのものを動的に変更する仕組み |
+| [07-declarative-management](../07-declarative-management/) | あるべき状態をマニフェストとして管理する方法と全体の統合 |
 
 ---
 
-## 次のトピックへ
+## [次のトピックへ](#next-topic) {#next-topic}
 
 このトピックでは、以下のことを学びました
 
@@ -777,66 +786,67 @@ Pod が必要とする CPU やメモリの量は、スケジューリングに�
 
 「この Pod は SSD を持つノードでしか動かさない」といった制約はどう実現されるのでしょうか？
 
-次のトピック [03-scheduling](./03-scheduling.md) では、<strong>スケジューリング</strong>の仕組みを詳しく学びます
+次のトピック [03-scheduling](../03-scheduling/) では、<strong>スケジューリング</strong>の仕組みを詳しく学びます
 
 ---
 
-## 用語集
+## [用語集](#glossary) {#glossary}
 
-| 用語                                          | 説明                                                                                                                      |
+{: .labeled}
+| 用語 | 説明 |
 | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| アーキテクチャ（Architecture）                | システムの全体構造。コンポーネントの構成と、それらの関係を指す                                                            |
-| クラスタ（Cluster）                           | 複数のマシン（ノード）を 1 つのまとまりとして管理するグループ                                                             |
-| コントロールプレーン（Control Plane）         | クラスタ全体を管理する中枢。API Server、etcd、Scheduler、Controller Manager で構成される                                  |
-| ノード（Node）                                | クラスタを構成する個々のマシン。Pod を実際に実行する                                                                      |
-| Pod                                           | Kubernetes におけるコンテナの実行単位。1 つ以上のコンテナを含み、スケジューリングの最小単位となる                         |
-| API Server（kube-apiserver）                  | クラスタに対するすべての操作を受け付ける唯一の窓口。RESTful API を提供する                                                |
-| RESTful API                                   | HTTP プロトコルを使ってリソースを操作する仕組み。取得、作成、更新、削除などの操作を HTTP メソッドで表現する               |
-| etcd                                          | クラスタのすべての状態を保存する分散キーバリューストア。唯一の情報源（Single Source of Truth）として機能する              |
-| キーバリューストア（Key-Value Store）         | キー（名前）とバリュー（値）の組み合わせでデータを保存するデータストア                                                    |
-| 唯一の情報源（Single Source of Truth）        | システムの正しい状態が記録されている、唯一の場所                                                                          |
-| Raft                                          | 複数のノード間でデータの一貫性を保つための合意アルゴリズム。etcd が内部で使用している                                     |
-| Watch 機能                                    | API Server がリソースの変更をリアルタイムに通知する仕組み。Scheduler や Controller Manager がこれを利用して変更を検知する |
-| Scheduler（kube-scheduler）                   | まだノードに割り当てられていない Pod を見つけ、適切なノードを選んで割り当てるコンポーネント                               |
-| フィルタリング（Filtering）                   | Scheduler がノード選択時に、Pod を実行できないノードを候補から除外するステップ                                            |
-| スコアリング（Scoring）                       | Scheduler がフィルタリング後のノード候補にスコアを付け、最適なノードを選ぶステップ                                        |
-| Controller Manager（kube-controller-manager） | 複数のコントローラを内包し、あるべき状態と実際の状態の差分を自動修正するコンポーネント                                    |
-| コントローラ（Controller）                    | 特定のリソースのあるべき状態を維持する責任を持つ制御ループ                                                                |
-| ReplicaSet                                    | 指定された数の Pod レプリカを維持するリソース                                                                             |
-| Deployment                                    | ReplicaSet を管理し、ローリングアップデートなどのデプロイ戦略を制御するリソース                                           |
-| kubelet                                       | 各ノード上で動作するエージェント。コントロールプレーンの指示を受けて Pod を管理する                                       |
-| CRI（Container Runtime Interface）            | kubelet とコンテナランタイムの間の標準インターフェース。ランタイムの実装に依存しない設計を可能にする                      |
-| containerd                                    | CRI に準拠した高レベルコンテナランタイム。コンテナイメージの管理やコンテナのライフサイクル管理を担当する                  |
-| runc                                          | OCI ランタイム仕様に準拠した低レベルコンテナランタイム。Linux カーネルの namespace と cgroup を使ってコンテナを作成する   |
-| OCI（Open Container Initiative）              | コンテナのランタイム仕様とイメージ仕様を標準化する団体                                                                    |
-| namespace                                     | Linux カーネルの機能。プロセスの見える範囲（PID、ネットワーク、ファイルシステムなど）を分離する                           |
-| cgroup（Control Group）                       | Linux カーネルの機能。プロセスが使用できるリソース（CPU、メモリなど）を制限する                                           |
-| kube-proxy                                    | 各ノード上でネットワークルールを管理し、Service への通信を適切な Pod に転送するコンポーネント                             |
-| Service                                       | 複数の Pod に対する安定したアクセス先を提供する抽象化。Pod の IP が変わっても、Service を通じて到達できる                 |
-| あるべき状態（Desired State）                 | システムが維持すべき目標の状態。マニフェストを通じて管理者が宣言する                                                      |
-| 実際の状態（Current State / Actual State）    | システムのその時点での実際の状態。あるべき状態と比較される                                                                |
-| 宣言的（Declarative）                         | 最終的にあるべき状態を宣言し、システムにその実現を任せる方法                                                              |
-| 命令的（Imperative）                          | 具体的な操作手順を 1 つずつ指示する方法                                                                                   |
-| Reconciliation Loop（調整ループ）             | 観察→比較→調整のサイクルを継続的に繰り返し、実際の状態をあるべき状態に収束させるメカニズム                                |
-| マニフェスト（Manifest）                      | あるべき状態を記述した定義ファイル。YAML 形式で書かれることが一般的                                                       |
+| アーキテクチャ（Architecture） | システムの全体構造。コンポーネントの構成と、それらの関係を指す |
+| クラスタ（Cluster） | 複数のマシン（ノード）を 1 つのまとまりとして管理するグループ |
+| コントロールプレーン（Control Plane） | クラスタ全体を管理する中枢。API Server、etcd、Scheduler、Controller Manager で構成される |
+| ノード（Node） | クラスタを構成する個々のマシン。Pod を実際に実行する |
+| Pod | Kubernetes におけるコンテナの実行単位。1 つ以上のコンテナを含み、スケジューリングの最小単位となる |
+| API Server（kube-apiserver） | クラスタに対するすべての操作を受け付ける唯一の窓口。RESTful API を提供する |
+| RESTful API | HTTP プロトコルを使ってリソースを操作する仕組み。取得、作成、更新、削除などの操作を HTTP メソッドで表現する |
+| etcd | クラスタのすべての状態を保存する分散キーバリューストア。唯一の情報源（Single Source of Truth）として機能する |
+| キーバリューストア（Key-Value Store） | キー（名前）とバリュー（値）の組み合わせでデータを保存するデータストア |
+| 唯一の情報源（Single Source of Truth） | システムの正しい状態が記録されている、唯一の場所 |
+| Raft | 複数のノード間でデータの一貫性を保つための合意アルゴリズム。etcd が内部で使用している |
+| Watch 機能 | API Server がリソースの変更をリアルタイムに通知する仕組み。Scheduler や Controller Manager がこれを利用して変更を検知する |
+| Scheduler（kube-scheduler） | まだノードに割り当てられていない Pod を見つけ、適切なノードを選んで割り当てるコンポーネント |
+| フィルタリング（Filtering） | Scheduler がノード選択時に、Pod を実行できないノードを候補から除外するステップ |
+| スコアリング（Scoring） | Scheduler がフィルタリング後のノード候補にスコアを付け、最適なノードを選ぶステップ |
+| Controller Manager（kube-controller-manager） | 複数のコントローラを内包し、あるべき状態と実際の状態の差分を自動修正するコンポーネント |
+| コントローラ（Controller） | 特定のリソースのあるべき状態を維持する責任を持つ制御ループ |
+| ReplicaSet | 指定された数の Pod レプリカを維持するリソース |
+| Deployment | ReplicaSet を管理し、ローリングアップデートなどのデプロイ戦略を制御するリソース |
+| kubelet | 各ノード上で動作するエージェント。コントロールプレーンの指示を受けて Pod を管理する |
+| CRI（Container Runtime Interface） | kubelet とコンテナランタイムの間の標準インターフェース。ランタイムの実装に依存しない設計を可能にする |
+| containerd | CRI に準拠した高レベルコンテナランタイム。コンテナイメージの管理やコンテナのライフサイクル管理を担当する |
+| runc | OCI ランタイム仕様に準拠した低レベルコンテナランタイム。Linux カーネルの namespace と cgroup を使ってコンテナを作成する |
+| OCI（Open Container Initiative） | コンテナのランタイム仕様とイメージ仕様を標準化する団体 |
+| namespace | Linux カーネルの機能。プロセスの見える範囲（PID、ネットワーク、ファイルシステムなど）を分離する |
+| cgroup（Control Group） | Linux カーネルの機能。プロセスが使用できるリソース（CPU、メモリなど）を制限する |
+| kube-proxy | 各ノード上でネットワークルールを管理し、Service への通信を適切な Pod に転送するコンポーネント |
+| Service | 複数の Pod に対する安定したアクセス先を提供する抽象化。Pod の IP が変わっても、Service を通じて到達できる |
+| あるべき状態（Desired State） | システムが維持すべき目標の状態。マニフェストを通じて管理者が宣言する |
+| 実際の状態（Current State / Actual State） | システムのその時点での実際の状態。あるべき状態と比較される |
+| 宣言的（Declarative） | 最終的にあるべき状態を宣言し、システムにその実現を任せる方法 |
+| 命令的（Imperative） | 具体的な操作手順を 1 つずつ指示する方法 |
+| Reconciliation Loop（調整ループ） | 観察→比較→調整のサイクルを継続的に繰り返し、実際の状態をあるべき状態に収束させるメカニズム |
+| マニフェスト（Manifest） | あるべき状態を記述した定義ファイル。YAML 形式で書かれることが一般的 |
 
 ---
 
-## 参考資料
+## [参考資料](#references) {#references}
 
 このページの内容は、以下のソースに基づいています
 
 <strong>Kubernetes アーキテクチャ</strong>
 
-- [Kubernetes Components](https://kubernetes.io/docs/concepts/overview/components/)
+- [Kubernetes Components](https://kubernetes.io/docs/concepts/overview/components/){:target="\_blank"}
   - コントロールプレーンとノードの各コンポーネントの公式説明
 
-- [The Kubernetes API](https://kubernetes.io/docs/concepts/overview/kubernetes-api/)
+- [The Kubernetes API](https://kubernetes.io/docs/concepts/overview/kubernetes-api/){:target="\_blank"}
   - API Server と RESTful API の仕様
 
 <strong>etcd と分散合意</strong>
 
-- [etcd Documentation](https://etcd.io/docs/)
+- [etcd Documentation](https://etcd.io/docs/){:target="\_blank"}
   - 分散キーバリューストア etcd の公式ドキュメント
 
 - "In Search of an Understandable Consensus Algorithm" (Ongaro & Ousterhout, 2014)
@@ -844,13 +854,13 @@ Pod が必要とする CPU やメモリの量は、スケジューリングに�
 
 <strong>コンテナランタイム</strong>
 
-- [Container Runtime Interface (CRI)](https://kubernetes.io/docs/concepts/architecture/cri/)
+- [Container Runtime Interface (CRI)](https://kubernetes.io/docs/concepts/architecture/cri/){:target="\_blank"}
   - kubelet とコンテナランタイム間のインターフェース仕様
 
-- [containerd Documentation](https://containerd.io/docs/)
+- [containerd Documentation](https://containerd.io/docs/){:target="\_blank"}
   - containerd の公式ドキュメント
 
-- [OCI Runtime Specification](https://github.com/opencontainers/runtime-spec)
+- [OCI Runtime Specification](https://github.com/opencontainers/runtime-spec){:target="\_blank"}
   - コンテナランタイムの標準仕様
 
 <strong>起源</strong>

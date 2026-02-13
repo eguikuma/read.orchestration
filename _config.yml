@@ -1,0 +1,11 @@
+title: read.orchestration
+description: 「コンテナ群はどう協調させるか」を学びます
+baseurl: /read.orchestration
+url: https://eguikuma.github.io
+markdown: kramdown
+permalink: pretty
+has_appendices: true
+
+include:
+  - manifest.webmanifest
+  - sw.js
