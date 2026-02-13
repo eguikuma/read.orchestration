@@ -445,15 +445,15 @@ kube-proxy のルールが更新されると、終了処理中の Pod に新し�
 | 用語 | 説明 |
 | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | Graceful Shutdown（グレースフルシャットダウン） | 処理中のリクエストを完了させ、リソースをクリーンアップしてから終了する安全な終了方法 |
-| SIGTERM | プロセスに終了を依頼するシグナル。プロセスはこのシグナルを受け取って終了処理を行う機会が与えられる |
-| SIGKILL | プロセスを強制的に終了するシグナル。プロセスはこのシグナルをハンドリングできず、即座に停止する |
-| Termination Grace Period（終了猶予期間） | kubelet が SIGTERM を送信してから SIGKILL を送信するまでの猶予時間。terminationGracePeriodSeconds で設定する |
-| terminationGracePeriodSeconds | Pod のマニフェストで設定する終了猶予期間の秒数。デフォルトは 30 秒 |
-| preStop フック | コンテナの終了前に実行されるライフサイクルフック。SIGTERM の送信前に実行される |
-| ライフサイクルフック（Lifecycle Hook） | コンテナのライフサイクルの特定のタイミングで実行される処理。preStop はその一種 |
+| SIGTERM | プロセスに終了を依頼するシグナル<br>プロセスはこのシグナルを受け取って終了処理を行う機会が与えられる |
+| SIGKILL | プロセスを強制的に終了するシグナル<br>プロセスはこのシグナルをハンドリングできず、即座に停止する |
+| Termination Grace Period（終了猶予期間） | kubelet が SIGTERM を送信してから SIGKILL を送信するまでの猶予時間<br>terminationGracePeriodSeconds で設定する |
+| terminationGracePeriodSeconds | Pod のマニフェストで設定する終了猶予期間の秒数<br>デフォルトは 30 秒 |
+| preStop フック | コンテナの終了前に実行されるライフサイクルフック<br>SIGTERM の送信前に実行される |
+| ライフサイクルフック（Lifecycle Hook） | コンテナのライフサイクルの特定のタイミングで実行される処理<br>preStop はその一種 |
 | コネクションドレイン（Connection Draining） | 新しいリクエストの受付を停止し、処理中のリクエストを完了させてから終了する手法 |
-| レース条件（Race Condition） | 複数の処理のタイミングによって異なる結果が生じる状態。Pod 削除時の SIGTERM 送信と EndpointSlice 更新の間で発生しうる |
-| Terminating | Pod が削除処理中であることを示す状態。API Server が Pod を Terminating に更新すると、終了シーケンスが開始される |
+| レース条件（Race Condition） | 複数の処理のタイミングによって異なる結果が生じる状態<br>Pod 削除時の SIGTERM 送信と EndpointSlice 更新の間で発生しうる |
+| Terminating | Pod が削除処理中であることを示す状態<br>API Server が Pod を Terminating に更新すると、終了シーケンスが開始される |
 
 ---
 

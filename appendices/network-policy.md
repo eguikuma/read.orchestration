@@ -419,16 +419,16 @@ Network Policy による通信制御が必要な場合は、Network Policy を�
 {: .labeled}
 | 用語 | 説明 |
 | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Network Policy | ラベルセレクタに基づいて Pod の通信を制御する Kubernetes リソース。許可リスト方式で動作し、明示的に許可されていない通信は拒否される |
-| 非隔離（Non-isolated） | Network Policy に選択されていない Pod の状態。すべての通信が許可される |
-| 隔離（Isolated） | Network Policy に選択された Pod の状態。明示的に許可された通信のみが可能になる |
-| Ingress | Pod への受信トラフィックの方向。Network Policy の Ingress 規則で制御する |
-| Egress | Pod からの送信トラフィックの方向。Network Policy の Egress 規則で制御する |
-| podSelector | Network Policy の対象となる Pod をラベルで選択する仕組み。空のセレクタは Namespace 内のすべての Pod を選択する |
-| namespaceSelector | 通信を許可する Namespace をラベルで選択する仕組み。Namespace をまたぐ通信の制御に使用する |
+| Network Policy | ラベルセレクタに基づいて Pod の通信を制御する Kubernetes リソース<br>許可リスト方式で動作し、明示的に許可されていない通信は拒否される |
+| 非隔離（Non-isolated） | Network Policy に選択されていない Pod の状態<br>すべての通信が許可される |
+| 隔離（Isolated） | Network Policy に選択された Pod の状態<br>明示的に許可された通信のみが可能になる |
+| Ingress | Pod への受信トラフィックの方向<br>Network Policy の Ingress 規則で制御する |
+| Egress | Pod からの送信トラフィックの方向<br>Network Policy の Egress 規則で制御する |
+| podSelector | Network Policy の対象となる Pod をラベルで選択する仕組み<br>空のセレクタは Namespace 内のすべての Pod を選択する |
+| namespaceSelector | 通信を許可する Namespace をラベルで選択する仕組み<br>Namespace をまたぐ通信の制御に使用する |
 | policyTypes | Network Policy が制御する方向（Ingress、Egress、またはその両方）を指定するフィールド |
 | デフォルト拒否（Default Deny） | すべての通信をデフォルトで拒否し、必要な通信だけを明示的に許可するセキュリティパターン |
-| 許可リスト方式（ホワイトリスト方式） | 許可する通信のみを定義し、それ以外を拒否する方式。Network Policy はこの方式で動作する |
+| 許可リスト方式（ホワイトリスト方式） | 許可する通信のみを定義し、それ以外を拒否する方式<br>Network Policy はこの方式で動作する |
 
 ---
 

@@ -387,12 +387,12 @@ Namespace に属さず、クラスタ全体で一意の名前を持ちます
 {: .labeled}
 | 用語 | 説明 |
 | -------------------------- | ------------------------------------------------------------------------------------------------------- |
-| リソース（Resource） | Kubernetes が管理するオブジェクトの種類。Pod、Service、Deployment など、apiVersion と kind で識別される |
-| apiVersion | マニフェストで使用する Kubernetes API のバージョン。リソースの種類によって異なる |
+| リソース（Resource） | Kubernetes が管理するオブジェクトの種類<br>Pod、Service、Deployment など、apiVersion と kind で識別される |
+| apiVersion | マニフェストで使用する Kubernetes API のバージョン<br>リソースの種類によって異なる |
 | kind | マニフェストで指定するリソースの種類 |
-| Namespace スコープ | 特定の Namespace に属するリソースのスコープ。Namespace 内で名前が一意であればよい |
-| Cluster スコープ | クラスタ全体に属するリソースのスコープ。クラスタ全体で名前が一意でなければならない |
-| コントローラ（Controller） | 特定のリソースのあるべき状態を維持する責任を持つ制御ループ。Controller Manager に内包される |
+| Namespace スコープ | 特定の Namespace に属するリソースのスコープ<br>Namespace 内で名前が一意であればよい |
+| Cluster スコープ | クラスタ全体に属するリソースのスコープ<br>クラスタ全体で名前が一意でなければならない |
+| コントローラ（Controller） | 特定のリソースのあるべき状態を維持する責任を持つ制御ループ<br>Controller Manager に内包される |
 
 ---
 

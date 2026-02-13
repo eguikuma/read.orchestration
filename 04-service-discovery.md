@@ -629,22 +629,22 @@ Pod が「正常に動いている」とは、何をもって判断するので�
 | 用語 | 説明 |
 | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | サービスディスカバリ（Service Discovery） | 分散システムにおいて、サービスの場所（IP アドレスやポート）を動的に発見する仕組み |
-| Service | Pod の集合に対する安定したアクセス先を提供する Kubernetes の抽象化。ラベルセレクタで対象の Pod を選択する |
-| ClusterIP | Service に割り当てられる仮想 IP アドレス。クラスタ内部からのみアクセスでき、Service が存在する限り変わらない |
-| ラベルセレクタ（Label Selector） | ラベルに基づいて Kubernetes オブジェクト（Pod など）を選択する仕組み。Service が対象の Pod を決定するために使用する |
-| EndpointSlice | Service のラベルセレクタに一致する Pod の IP アドレスとポート番号のリスト。Pod の作成・削除に応じて自動的に更新される |
+| Service | Pod の集合に対する安定したアクセス先を提供する Kubernetes の抽象化<br>ラベルセレクタで対象の Pod を選択する |
+| ClusterIP | Service に割り当てられる仮想 IP アドレス<br>クラスタ内部からのみアクセスでき、Service が存在する限り変わらない |
+| ラベルセレクタ（Label Selector） | ラベルに基づいて Kubernetes オブジェクト（Pod など）を選択する仕組み<br>Service が対象の Pod を決定するために使用する |
+| EndpointSlice | Service のラベルセレクタに一致する Pod の IP アドレスとポート番号のリスト<br>Pod の作成・削除に応じて自動的に更新される |
 | kube-proxy | 各ノード上で動作し、Service の ClusterIP 宛てのトラフィックを実際の Pod に転送するコンポーネント |
-| DNS（Domain Name System） | 名前から IP アドレスを解決する仕組み。Kubernetes クラスタ内では CoreDNS がこの役割を担う |
-| CoreDNS | Kubernetes クラスタ内で動作するプラグインベースの DNS サーバー。Service と Pod の DNS レコードを自動的に管理する |
-| DNS レコード | DNS サーバーが保持する名前と IP アドレスの対応情報。Service が作成されると自動的に DNS レコードが作成される |
-| サーチリスト（Search List） | DNS 問い合わせ時に、短い名前を完全な DNS 名に展開するためのサフィックスのリスト。kubelet が Pod に自動設定する |
-| Namespace | Kubernetes のリソースを論理的にグループ化する仕組み。同じクラスタ内で複数の環境やチームを分離するために使用する |
-| Headless Service | ClusterIP を持たない特殊な Service。DNS 問い合わせに対して個々の Pod の IP アドレスを返す |
-| NodePort | すべてのノードの特定ポートで Service を公開する種類。クラスタ外部からノードの IP とポート番号でアクセスできる |
-| LoadBalancer | 外部ロードバランサーを通じて Service を公開する種類。クラウド環境で外部ロードバランサーが自動的にプロビジョニングされる |
-| NAT（Network Address Translation） | ネットワークアドレス変換。IP アドレスを別の IP アドレスに変換する仕組み。Kubernetes のネットワークモデルでは Pod 間通信に NAT を使わないことが要件 |
-| CNI（Container Network Interface） | Kubernetes がネットワークプラグインと連携するための標準インターフェース。Pod への IP アドレス割り当てとネットワーク接続を担当する |
-| Readiness Probe | Pod がトラフィックを受け入れる準備ができているかを確認するヘルスチェック。失敗した Pod は EndpointSlice から一時的に除外される |
+| DNS（Domain Name System） | 名前から IP アドレスを解決する仕組み<br>Kubernetes クラスタ内では CoreDNS がこの役割を担う |
+| CoreDNS | Kubernetes クラスタ内で動作するプラグインベースの DNS サーバー<br>Service と Pod の DNS レコードを自動的に管理する |
+| DNS レコード | DNS サーバーが保持する名前と IP アドレスの対応情報<br>Service が作成されると自動的に DNS レコードが作成される |
+| サーチリスト（Search List） | DNS 問い合わせ時に、短い名前を完全な DNS 名に展開するためのサフィックスのリスト<br>kubelet が Pod に自動設定する |
+| Namespace | Kubernetes のリソースを論理的にグループ化する仕組み<br>同じクラスタ内で複数の環境やチームを分離するために使用する |
+| Headless Service | ClusterIP を持たない特殊な Service<br>DNS 問い合わせに対して個々の Pod の IP アドレスを返す |
+| NodePort | すべてのノードの特定ポートで Service を公開する種類<br>クラスタ外部からノードの IP とポート番号でアクセスできる |
+| LoadBalancer | 外部ロードバランサーを通じて Service を公開する種類<br>クラウド環境で外部ロードバランサーが自動的にプロビジョニングされる |
+| NAT（Network Address Translation） | ネットワークアドレス変換<br>IP アドレスを別の IP アドレスに変換する仕組み<br>Kubernetes のネットワークモデルでは Pod 間通信に NAT を使わないことが要件 |
+| CNI（Container Network Interface） | Kubernetes がネットワークプラグインと連携するための標準インターフェース<br>Pod への IP アドレス割り当てとネットワーク接続を担当する |
+| Readiness Probe | Pod がトラフィックを受け入れる準備ができているかを確認するヘルスチェック<br>失敗した Pod は EndpointSlice から一時的に除外される |
 | プラグインチェーン（Plugin Chain） | CoreDNS がDNS 問い合わせを処理する際に、複数のプラグインを順番に通す仕組み |
 
 ---

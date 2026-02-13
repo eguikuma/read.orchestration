@@ -268,7 +268,7 @@ Kubernetes には 3 種類の Probe があります
 | --------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | Liveness Probe | コンテナが生きているかを確認する | コンテナを再起動する |
 | Readiness Probe | コンテナがトラフィックを受け入れる準備ができているかを確認する | Service の EndpointSlice から Pod を除外する（再起動はしない） |
-| Startup Probe | コンテナの起動が完了したかを確認する | 成功するまで Liveness Probe と Readiness Probe を無効にする。failureThreshold に達するとコンテナを再起動する |
+| Startup Probe | コンテナの起動が完了したかを確認する | 成功するまで Liveness Probe と Readiness Probe を無効にする<br>failureThreshold に達するとコンテナを再起動する |
 
 ### [Liveness Probe（生存確認）](#liveness-probe) {#liveness-probe}
 
@@ -588,19 +588,19 @@ Kubernetes が Reconciliation Loop を通じて、自動的にあるべき状態
 | --------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | セルフヒーリング（Self-Healing） | 障害を自動で検知し、あるべき状態に戻すための調整を自動で行う仕組み |
 | Reconciliation Loop（調整ループ） | 観察→比較→調整のサイクルを継続的に繰り返し、実際の状態をあるべき状態に収束させるメカニズム |
-| コントローラ（Controller） | 特定のリソースのあるべき状態を維持する責任を持つ制御ループ。Controller Manager に内包される |
-| ReplicaSet コントローラ | 指定された数の Pod レプリカを維持するコントローラ。Pod の数が不足すれば作成し、過剰なら削除する |
+| コントローラ（Controller） | 特定のリソースのあるべき状態を維持する責任を持つ制御ループ<br>Controller Manager に内包される |
+| ReplicaSet コントローラ | 指定された数の Pod レプリカを維持するコントローラ<br>Pod の数が不足すれば作成し、過剰なら削除する |
 | Node コントローラ | ノードの状態を監視し、応答がないノードを検知するコントローラ |
-| 再起動ポリシー（restartPolicy） | コンテナの終了時に kubelet がどう対応するかを決めるポリシー。Always、OnFailure、Never の 3 種類がある |
+| 再起動ポリシー（restartPolicy） | コンテナの終了時に kubelet がどう対応するかを決めるポリシー<br>Always、OnFailure、Never の 3 種類がある |
 | CrashLoopBackOff | コンテナが繰り返し異常終了し、kubelet が再起動の間隔を指数関数的に延長している状態 |
 | Probe（プローブ） | kubelet がコンテナに対して定期的に実行するヘルスチェック |
-| Liveness Probe | コンテナが生きているかを確認する Probe。失敗するとコンテナが再起動される |
-| Readiness Probe | コンテナがトラフィックを受け入れる準備ができているかを確認する Probe。失敗すると EndpointSlice から Pod が除外される |
-| Startup Probe | コンテナの起動が完了したかを確認する Probe。成功するまで Liveness Probe と Readiness Probe が無効になる |
-| ハートビート（Heartbeat） | ノードがコントロールプレーンに対して定期的に送信する生存報告。ノードステータスの更新と Lease オブジェクトの更新がある |
-| Lease オブジェクト | ノードの可用性を効率的に確認するための軽量なリソース。kube-node-lease Namespace に作成される |
+| Liveness Probe | コンテナが生きているかを確認する Probe<br>失敗するとコンテナが再起動される |
+| Readiness Probe | コンテナがトラフィックを受け入れる準備ができているかを確認する Probe<br>失敗すると EndpointSlice から Pod が除外される |
+| Startup Probe | コンテナの起動が完了したかを確認する Probe<br>成功するまで Liveness Probe と Readiness Probe が無効になる |
+| ハートビート（Heartbeat） | ノードがコントロールプレーンに対して定期的に送信する生存報告<br>ノードステータスの更新と Lease オブジェクトの更新がある |
+| Lease オブジェクト | ノードの可用性を効率的に確認するための軽量なリソース<br>kube-node-lease Namespace に作成される |
 | NotReady | ノードがハートビートを送信しなくなった場合にマークされる状態 |
-| Taint（テイント） | ノードに「問題がある」ことをマークする仕組み。対応する Toleration を持たない Pod はスケジュールされない |
+| Taint（テイント） | ノードに「問題がある」ことをマークする仕組み<br>対応する Toleration を持たない Pod はスケジュールされない |
 | Toleration（トレレーション） | 特定の Taint を許容するための Pod 側の設定 |
 | デッドロック（Deadlock） | 複数の処理が互いの完了を待ち合い、どの処理も進めなくなる状態 |
 
